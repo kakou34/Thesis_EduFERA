@@ -3,11 +3,18 @@ import os
 from PIL import Image
 
 
-def clean_affectNet(csv_path, base_path_src, base_path_des, max_img=1000000):
+def clean_affectNet(csv_path, base_path_src, base_path_des, max_img=1000000, balanced=False):
     df = pd.read_csv(csv_path)
-    df = df.drop(columns=['facial_landmarks', 'expression'])
+
+    df = df.drop(columns=['facial_landmarks'])
     # Removing no face images
     df = df.drop(df[(df.valence == -2) & (df.arousal == -2)].index)
+
+    # Balance
+    if balanced:
+        df = balance(df)
+
+    print(df.shape[0])
 
     count = 0
     for i, row in df.iterrows():
@@ -34,3 +41,17 @@ def clean_affectNet(csv_path, base_path_src, base_path_des, max_img=1000000):
         img_path_fin = base_path_des + img_path_des
         face.save(img_path_fin)
         count = count + 1
+
+
+def balance(df):
+    class0 = df[(df.expression == 0)].tail(64874)
+    df = df.drop(class0.index)
+    class1 = df[(df.expression == 1)].tail(124415)
+    df = df.drop(class1.index)
+    class2 = df[(df.expression == 2)].tail(15459)
+    df = df.drop(class2.index)
+    class3 = df[(df.expression == 3)].tail(4090)
+    df = df.drop(class3.index)
+    class6 = df[(df.expression == 6)].tail(14882)
+    df = df.drop(class6.index)
+    return df
