@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 from PIL import Image
 
@@ -14,16 +15,18 @@ def clean_affectNet(csv_path, base_path_src, base_path_des, max_img=1000000, bal
     if balanced:
         df = balance(df)
 
-    print(df.shape[0])
+
 
     count = 0
     for i, row in df.iterrows():
-        print(count)
         if count > max_img:
             break
+            
         # Cropping the face
         image_path = base_path_src + df.at[i, 'subDirectory_filePath']
+        print(image_path)
         image = Image.open(image_path)
+
 
         face_x1 = df.at[i, 'face_x']
         face_x2 = face_x1 + df.at[i, 'face_width']
@@ -55,3 +58,14 @@ def balance(df):
     class6 = df[(df.expression == 6)].tail(14882)
     df = df.drop(class6.index)
     return df
+
+def split(csv):
+    df = pd.read_csv(csv)
+    df = df.drop(columns=['face_x', 'face_y', 'face_width', 'face_height'])
+    msk = np.random.rand(len(df)) < 0.8
+    train = df[msk]
+    val = df[~msk]
+
+    train.to_csv("D:/Studies/PFE/AffectNet/train.csv")
+    val.to_csv("D:/Studies/PFE/AffectNet/val.csv")
+
