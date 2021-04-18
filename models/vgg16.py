@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchfile
 
+
 class VGG_16(nn.Module):
     """
     Main Class
