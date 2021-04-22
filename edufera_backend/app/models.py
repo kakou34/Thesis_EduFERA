@@ -1,9 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
-from flask import jsonify
 from datetime import datetime
-
-db = SQLAlchemy()
+from . import db
 
 
 class MeetingModel(db.Model):
@@ -13,7 +9,7 @@ class MeetingModel(db.Model):
     meeting_id = db.Column(db.String(), unique=True, nullable=False)
     start_time = db.Column(db.DateTime(), nullable=False)  # when host starts the meeting
     end_time = db.Column(db.DateTime(), nullable=True)  # when host ends meeting
-    attendances = relationship("attendance")
+    attendances = db.relationship("AttendanceModel")
 
     def __init__(self, meeting_id, start_time, end_time=None):
         self.meeting_id = meeting_id
@@ -22,6 +18,28 @@ class MeetingModel(db.Model):
 
     def __repr__(self):
         return f"{self.id}:{self.meeting_id}"
+
+    @classmethod
+    def get_meeting(cls, meeting_id):
+        meeting = cls.query.filter_by(meeting_id=meeting_id).first()
+
+        return meeting
+
+    @classmethod
+    def start_meeting(cls, meeting_id, start_time=datetime.now()):
+        meeting = cls(meeting_id, start_time)
+        db.session.add(meeting)
+        db.session.commit()
+
+        return meeting
+
+    @classmethod
+    def end_meeting(cls, meeting_id, end_time=datetime.now()):
+        meeting = cls.query.get(meeting_id)
+        meeting.end_time = end_time
+        db.session.commit()
+
+        return meeting
 
 
 class AttendanceModel(db.Model):
@@ -32,7 +50,7 @@ class AttendanceModel(db.Model):
     user_id = db.Column(db.String(), unique=True, nullable=False)
     user_name = db.Column(db.String(), nullable=True)  # Optional
     join_time = db.Column(db.DateTime(), nullable=False)  # when user joins the meeting
-    emotions = relationship("emotion")
+    emotions = db.relationship("EmotionModel")
 
     def __init__(self, meeting_id, user_id, join_time, user_name="Hidden"):
         self.meeting_id = meeting_id
@@ -62,49 +80,48 @@ class EmotionModel(db.Model):
     def __repr__(self):
         return f"{self.time_stamp}:{self.valence}, {self.arousal}"
 
-#----------------------------------------------------
-def get_meetting(meetingId):
-    mtg = MeetingModel.query.get(meetingId)
-    return jsonify(mtg)
 
-def start_meeting(meeting_id, start_time=datetime.now):
-    mtg = MeetingModel(meeting_id, start_time)
-    db.session.add(mtg)
+def end_meeting(meeting_id, end_time=datetime.now):
+    meeting = MeetingModel.query.get(meeting_id)
+    meeting.end_time = end_time
     db.session.commit()
 
-    return jsonify(mtg)
+    return meeting
 
-def end_metting(meeting_id, end_time=datetime.now):
-    mtg = MeetingModel.query.get(meeting_id)
-    mtg.end_time = end_time
-    db.session.commit()
 
-    return jsonify(mtg)
+# ----------------------------------------------------
+def get_attendance(attendance_id):
+    attendance = AttendanceModel.query.get(attendance_id)
 
-#----------------------------------------------------
-def get_attendace(attendance_id):
-    attndce = AttendanceModel.query.get(attendance_id)
-    return jsonify(attndce)
+    return attendance
 
-def get_attendaceByMeetingId(meeting_id):
-    attndce = db.session.query(User).filter(meeting_id=meeting_id)
-    return jsonify(attndce)
+
+def get_attendance_by_meeting_id(meeting_id):
+    meeting = MeetingModel.query.get(meeting_id)
+    attendances = meeting.attendances
+
+    return attendances
+
 
 def create_attendace(meeting_id, user_id, join_time=datetime.now, user_name="Hidden"):
-    attndce = AttendanceModel(meeting_id, user_id, join_time, user_name)
-    db.session.add(attndce)
+    attendance = AttendanceModel(meeting_id, user_id, join_time, user_name)
+    db.session.add(attendance)
     db.session.commit()
-    return jsonify(attndce)
+
+    return attendance
 
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 def get_emotion(emotion_id):
     emotion = EmotionModel.query.get(emotion_id)
-    return jsonify(emotion)
 
-def save_emotion(attendance_id, time_stamp=datetime.now, valence, arousal):
+    return emotion
+
+
+def save_emotion(attendance_id, valence, arousal, time_stamp=datetime.now):
     emotion = EmotionModel(attendance_id, time_stamp, valence, arousal)
     db.session.add(emotion)
-    db.commit()
-    return jsonify(emotion)
+    db.session.commit()
+
+    return emotion
 
