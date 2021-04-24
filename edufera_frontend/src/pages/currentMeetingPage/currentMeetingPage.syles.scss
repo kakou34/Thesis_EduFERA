@@ -1,0 +1,21 @@
+.current {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 80px;
+    .meetingContainer {
+      
+        min-width: 90%;
+        min-height: 650px;
+        height: auto;
+       // flex: 1 1 auto;
+        flex-direction: column;
+       // display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        border: 4px solid #0CF7DA;
+        margin: 0 7.5px 15px;
+    
+    }
+  }
+

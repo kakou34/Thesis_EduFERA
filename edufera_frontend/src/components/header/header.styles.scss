@@ -1,0 +1,80 @@
+.header {
+    height: 70px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px ;
+    border-bottom: 3px solid  #0CF7DA;
+   // margin-right: 100px;
+  
+    .logo-container {
+      height: 100%;
+      width: 70px;
+      padding-left: 20px;
+      display: flex; 
+    }
+  
+    .options {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 170px;
+  
+      .option {
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+    }
+    a{
+      text-decoration: none;
+      
+      font-weight: bold;
+      
+      margin: 0 12px;
+      text-transform: uppercase;
+        transition: color 0.1s,background-color 0.1s,padding 0.2s ease-in;
+        color: #000;
+    }
+    a:hover, a:focus, a:active {
+      color: #999;
+      text-decoration: none;
+    }
+    a {
+      position: relative;
+      display: block;
+      padding: 16px 0;
+      margin: 0 12px;
+      letter-spacing: 1px;
+      font-size: 16px;
+      
+      font-weight: 900;
+      text-transform: uppercase;
+      transition: color 0.1s,background-color 0.1s,padding 0.2s ease-in;
+      color: #000;
+    }
+    
+    a::before {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 3px;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background-color: #000;
+      transform-origin: right top;
+      transform: scale(0, 1);
+      transition: color 0.1s,transform 0.2s ease-out;
+    }
+    a:active::before {
+      background-color: #000;
+    }
+    a:hover::before, a:focus::before {
+        transform-origin: left top;
+        transform: scale(1, 1);
+    }
+
+  }
+  
