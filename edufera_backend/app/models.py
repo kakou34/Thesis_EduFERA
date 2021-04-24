@@ -60,6 +60,31 @@ class AttendanceModel(db.Model):
 
     def __repr__(self):
         return f"{self.id}:{self.meeting_id}, {self.user_id}"
+    
+    @classmethod
+    def get_attendance(cls, attendance_id):
+        attendance = cls.query.get(attendance_id)
+
+        return attendance
+
+    @classmethod
+    def create_attendance(cls, meeting_id, user_id, join_time=datetime.now, user_name="Hidden"):
+        attendance = cls(meeting_id, user_id, join_time, user_name)
+        db.session.add(attendance)
+        db.session.commit()
+
+        return attendance
+    
+    @classmethod
+    def get_attendance_by_meeting_id(cls, meeting_id):
+        meeting = cls.query.get(meeting_id)
+        attendances = meeting.attendances
+
+        return attendances
+
+
+    
+
 
 
 class EmotionModel(db.Model):
@@ -79,49 +104,22 @@ class EmotionModel(db.Model):
 
     def __repr__(self):
         return f"{self.time_stamp}:{self.valence}, {self.arousal}"
+    
+    @classmethod
+    def get_emotion(cls, emotion_id):
+        emotion = cls.query.get(emotion_id)
+
+        return emotion
+
+    @classmethod
+    def save_emotion(cls, attendance_id, valence, arousal, time_stamp=datetime.now):
+        emotion = cls(attendance_id, time_stamp, valence, arousal)
+        db.session.add(emotion)
+        db.session.commit()
+
+        return emotion
+    
+    
 
 
-def end_meeting(meeting_id, end_time=datetime.now):
-    meeting = MeetingModel.query.get(meeting_id)
-    meeting.end_time = end_time
-    db.session.commit()
-
-    return meeting
-
-
-# ----------------------------------------------------
-def get_attendance(attendance_id):
-    attendance = AttendanceModel.query.get(attendance_id)
-
-    return attendance
-
-
-def get_attendance_by_meeting_id(meeting_id):
-    meeting = MeetingModel.query.get(meeting_id)
-    attendances = meeting.attendances
-
-    return attendances
-
-
-def create_attendace(meeting_id, user_id, join_time=datetime.now, user_name="Hidden"):
-    attendance = AttendanceModel(meeting_id, user_id, join_time, user_name)
-    db.session.add(attendance)
-    db.session.commit()
-
-    return attendance
-
-
-# ---------------------------------------------------------
-def get_emotion(emotion_id):
-    emotion = EmotionModel.query.get(emotion_id)
-
-    return emotion
-
-
-def save_emotion(attendance_id, valence, arousal, time_stamp=datetime.now):
-    emotion = EmotionModel(attendance_id, time_stamp, valence, arousal)
-    db.session.add(emotion)
-    db.session.commit()
-
-    return emotion
 
