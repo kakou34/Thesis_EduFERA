@@ -1,0 +1,56 @@
+.users-items {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  
+  .usersContainer {
+    min-width: 70%;
+    min-height: 400px;
+    height: auto;
+   // flex: 1 1 auto;
+    flex-direction: column;
+   // display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    border: 4px solid #0CF7DA;
+    margin: 0 7.5px 15px;
+    .listItem {
+      border: 4px solid #0CF7DA;
+    }
+}
+
+
+.btnPastMeetings {
+width: auto;
+//width: 170px;
+height: 100px;
+padding: 0 35px 0 35px;
+border-radius: 10px;
+letter-spacing: 0.5px;
+line-height: 50px;
+padding: 0 30px 0 30px;
+font-size: 15px;
+background-color: #0CF7DA;
+color: white;
+text-transform: uppercase;
+//font-family: 'Open Sans Condensed';
+font-weight: bolder;
+border: none;
+cursor: pointer;
+.linkPastMeetings{
+ a{text-decoration: none;} 
+
+
+  &:hover {
+    text-decoration: none;
+    background-color: #0cd3bc;
+    color: #0CF7DA;
+    border: 1px solid white;
+  }
+
+}
+}
+}
