@@ -1,15 +1,142 @@
+from dataclasses import dataclass
 from datetime import datetime
 from . import db
 
 
-class MeetingModel(db.Model):
-    __tablename__ = "meeting"
+@dataclass
+class Attendance(db.Model):
+    meeting_id: int
+    user_id: int
+    join_time: datetime
 
+    __tablename__ = "attendance"
+    id = db.Column(db.Integer, primary_key=True)
+    meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    join_time = db.Column(db.DateTime(), nullable=False)  # when user joins the meeting
+
+    def __init__(self, meeting_id, user_id, join_time):
+        self.meeting_id = meeting_id
+        self.user_id = user_id
+        self.join_time = join_time
+
+    def __repr__(self):
+        return f"{self.id}:{self.meeting_id}, {self.user_id}"
+
+    @classmethod
+    def get_attendance(cls, attendance_id):
+        attendance = cls.query.get(attendance_id)
+        return attendance
+
+    @classmethod
+    def create_attendance(cls, meeting_id, user_id, join_time=datetime.now):
+        attendance = cls(meeting_id, user_id, join_time)
+        db.session.add(attendance)
+        db.session.commit()
+        return attendance
+
+    @classmethod
+    def get_attendance_by_meeting_id(cls, meeting_id):
+        attendances = cls.query.filter_by(meeting_id=meeting_id).all()
+        return attendances
+
+    @classmethod
+    def get_attendance_by_meeting_and_user(cls, meeting_id, user_id):
+        user = User.get_user(user_id)
+        meeting = Meeting.get_meeting(meeting_id)
+        if meeting and user:
+            return first(x for x in meeting.attendances if x.user_id == user.id)
+
+
+@dataclass
+class Emotion(db.Model):
+    meeting_id: int
+    user_id: int
+    time_stamp: datetime
+    valence: float
+    arousal: float
+
+    __tablename__ = "emotion"
+    id = db.Column(db.Integer, primary_key=True)
+    meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
+    valence = db.Column(db.Float(), nullable=False)  # model result for valence
+    arousal = db.Column(db.Float(), nullable=False)  # model result for arousal
+
+    def __init__(self, meeting_id, user_id, valence, arousal, time_stamp):
+        self.meeting_id = meeting_id
+        self.user_id = user_id
+        self.valence = valence
+        self.arousal = arousal
+        self.time_stamp = time_stamp
+
+    def __repr__(self):
+        return f"{self.time_stamp}:{self.valence}, {self.arousal}"
+
+    @classmethod
+    def get_emotion(cls, emotion_id):
+        emotion = cls.query.get(emotion_id)
+        return emotion
+
+    @classmethod
+    def save_emotion(cls, meeting_id, user_id, valence, arousal, time_stamp=datetime.now()):
+        emotion = cls(meeting_id, user_id, valence, arousal, time_stamp)
+        db.session.add(emotion)
+        db.session.commit()
+        return emotion
+
+
+@dataclass
+class User(db.Model):
+    __tablename__ = "user"
+
+    user_id: str
+    user_name: str
+    attendances: Attendance
+    emotions: Emotion
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(), unique=True, nullable=False)
+    user_name = db.Column(db.String(), nullable=True)
+    attendances = db.relationship("Attendance")
+    emotions = db.relationship("Emotion")
+
+    def __init__(self, user_id, user_name="Hidden"):
+        self.user_id = user_id
+        self.user_name = user_name
+
+    def __repr__(self):
+        return f"{self.user_id}:{self.user_name}"
+
+    @classmethod
+    def get_user(cls, user_id):
+        user = cls.query.filter_by(user_id=user_id).first()
+        return user
+
+    @classmethod
+    def add_user(cls, user_id, user_name="Hidden"):
+        user = cls(user_id, user_name)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+
+@dataclass
+class Meeting(db.Model):
+    meeting_id: str
+    start_time: datetime
+    end_time: datetime
+    attendances: Attendance
+    emotions: Emotion
+
+    __tablename__ = "meeting"
     id = db.Column(db.Integer, primary_key=True)
     meeting_id = db.Column(db.String(), unique=True, nullable=False)
     start_time = db.Column(db.DateTime(), nullable=False)  # when host starts the meeting
     end_time = db.Column(db.DateTime(), nullable=True)  # when host ends meeting
-    attendances = db.relationship("AttendanceModel")
+    attendances = db.relationship("Attendance")
+    emotions = db.relationship("Emotion")
 
     def __init__(self, meeting_id, start_time, end_time=None):
         self.meeting_id = meeting_id
@@ -22,7 +149,6 @@ class MeetingModel(db.Model):
     @classmethod
     def get_meeting(cls, meeting_id):
         meeting = cls.query.filter_by(meeting_id=meeting_id).first()
-
         return meeting
 
     @classmethod
@@ -35,93 +161,20 @@ class MeetingModel(db.Model):
 
     @classmethod
     def end_meeting(cls, meeting_id, end_time=datetime.now()):
-        meeting = cls.query.get(meeting_id)
+        meeting = cls.query.filter_by(meeting_id=meeting_id).first()
         meeting.end_time = end_time
         db.session.commit()
 
         return meeting
 
-
-class AttendanceModel(db.Model):
-    __tablename__ = "attendance"
-
-    id = db.Column(db.Integer, primary_key=True)
-    meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
-    user_id = db.Column(db.String(), unique=True, nullable=False)
-    user_name = db.Column(db.String(), nullable=True)  # Optional
-    join_time = db.Column(db.DateTime(), nullable=False)  # when user joins the meeting
-    emotions = db.relationship("EmotionModel")
-
-    def __init__(self, meeting_id, user_id, join_time, user_name="Hidden"):
-        self.meeting_id = meeting_id
-        self.user_id = user_id
-        self.join_time = join_time
-        self.user_name = user_name
-
-    def __repr__(self):
-        return f"{self.id}:{self.meeting_id}, {self.user_id}"
+    @classmethod
+    def get_past_meetings(cls):
+        meetings = cls.query.filter_by(cls.end_time < datetime.now()).all()
+        return meetings
 
 
-class EmotionModel(db.Model):
-    __tablename__ = "emotion"
-
-    id = db.Column(db.Integer, primary_key=True)
-    attendance_id = db.Column(db.Integer, db.ForeignKey('attendance.id'))   # here we will get meeting_id and user_id
-    time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
-    valence = db.Column(db.Float(), nullable=False)  # model result for valence
-    arousal = db.Column(db.Float(), nullable=False)  # model result for arousal
-
-    def __init__(self, attendance_id, time_stamp, valence, arousal):
-        self.attendance_id = attendance_id
-        self.valence = valence
-        self.arousal = arousal
-        self.time_stamp = time_stamp
-
-    def __repr__(self):
-        return f"{self.time_stamp}:{self.valence}, {self.arousal}"
-
-
-def end_meeting(meeting_id, end_time=datetime.now):
-    meeting = MeetingModel.query.get(meeting_id)
-    meeting.end_time = end_time
-    db.session.commit()
-
-    return meeting
-
-
-# ----------------------------------------------------
-def get_attendance(attendance_id):
-    attendance = AttendanceModel.query.get(attendance_id)
-
-    return attendance
-
-
-def get_attendance_by_meeting_id(meeting_id):
-    meeting = MeetingModel.query.get(meeting_id)
-    attendances = meeting.attendances
-
-    return attendances
-
-
-def create_attendace(meeting_id, user_id, join_time=datetime.now, user_name="Hidden"):
-    attendance = AttendanceModel(meeting_id, user_id, join_time, user_name)
-    db.session.add(attendance)
-    db.session.commit()
-
-    return attendance
-
-
-# ---------------------------------------------------------
-def get_emotion(emotion_id):
-    emotion = EmotionModel.query.get(emotion_id)
-
-    return emotion
-
-
-def save_emotion(attendance_id, valence, arousal, time_stamp=datetime.now):
-    emotion = EmotionModel(attendance_id, time_stamp, valence, arousal)
-    db.session.add(emotion)
-    db.session.commit()
-
-    return emotion
+def first(iterable, default=None):
+    for item in iterable:
+        return item
+    return default
 
