@@ -4,6 +4,20 @@ from flask import request, make_response, jsonify
 from flask import current_app as app
 from .models import Meeting, Attendance
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
+from edufera_backend.app.ml_model import batch_prediction
+from service_streamer import ThreadedStreamer
+
+streamer = ThreadedStreamer(batch_prediction, batch_size=64)
+
+
+@app.route('/stream_predict', methods=['POST'])
+def stream_predict():
+    if request.method == 'POST':
+        frame = request.files['frame']
+        if frame:
+            img_bytes = frame.read()
+            [valence, arousal] = streamer.predict([img_bytes])[0]
+            return jsonify({'valence': valence, 'arousal': arousal})
 
 
 @app.route('/start_meeting', methods=['GET'])
