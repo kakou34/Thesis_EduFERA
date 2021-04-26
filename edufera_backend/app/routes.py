@@ -34,6 +34,19 @@ def get_meeting():
                 f'Meeting: {meeting_id} does not exist!'
             )
 
+@app.route('/end_meeting', methods=['GET'])
+def end_meeting():
+    meeting_id = request.args.get('meeting_id')
+    if meeting_id:
+        the_meeting = MeetingModel.get_meeting(meeting_id)
+        the_meeting.end_meeting()
+        if the_meeting:
+            return {'ended_meeting' : the_meeting}
+        return make_response(
+                f'Meeting: {meeting_id} does not exsist!'
+            )
+
+
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
     result_dic = []
