@@ -1,5 +1,5 @@
 from flask import Flask
-from edufera_backend.app.model import load_model
+from .model import load_model
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
