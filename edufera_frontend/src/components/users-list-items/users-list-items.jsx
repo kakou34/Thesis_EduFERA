@@ -32,6 +32,9 @@ class UsersListItem extends React.Component {
             <div className='diagram-container'>
              <div className='diagram'>Here goes diagram</div>
             </div>
+            <div className='piechart-container'>
+             <div className='piechart'>Here goes piechart</div>
+            </div>
            </div>
          </Expand>
        </React.Fragment>

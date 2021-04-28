@@ -1,5 +1,5 @@
 import React from 'react';
-import DirectoryItems from '../../components/directory-items/directory-items.component';
+import MeetingsDirectory from '../../components/meetings-directory/meetings-directory.component';
 import './currentMeetingPage.syles.scss';
 import SearchBox from '../../components/search-box/search-box.component'
 
