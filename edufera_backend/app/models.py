@@ -4,13 +4,12 @@ from enum import Enum
 from . import db
 
 
-
-
 class EmotionEnum(Enum):
     active_pleasant = 0
     active_unpleasant = 1
     inactive_unpleasant = 2
     inactive_pleasant = 3
+
 
 @dataclass
 class Attendance(db.Model):
@@ -86,7 +85,7 @@ class Emotion(db.Model):
         return emotion
 
     @classmethod
-    def save_emotion(cls, meeting_id, user_id, valence, arousal, time_stamp=datetime.now()):
+    def save_emotion(cls, meeting_id, user_id, value, time_stamp=datetime.now()):
         emotion = cls(meeting_id, user_id, value, time_stamp)
         db.session.add(emotion)
         db.session.commit()

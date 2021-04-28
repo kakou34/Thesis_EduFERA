@@ -1,5 +1,5 @@
 """App entry point."""
-from app import init_app
+from edufera_backend.app import init_app
 
 app = init_app()
 
