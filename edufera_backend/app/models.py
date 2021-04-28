@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from . import db
+
+
+class EmotionEnum(Enum):
+    active_pleasant = 0
+    active_unpleasant = 1
+    inactive_unpleasant = 2
+    inactive_pleasant = 3
 
 
 @dataclass
@@ -53,22 +61,19 @@ class Emotion(db.Model):
     meeting_id: int
     user_id: int
     time_stamp: datetime
-    valence: float
-    arousal: float
+    value: int
 
     __tablename__ = "emotion"
     id = db.Column(db.Integer, primary_key=True)
     meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
-    valence = db.Column(db.Float(), nullable=False)  # model result for valence
-    arousal = db.Column(db.Float(), nullable=False)  # model result for arousal
+    value = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, meeting_id, user_id, valence, arousal, time_stamp):
+    def __init__(self, meeting_id, user_id, value, time_stamp):
         self.meeting_id = meeting_id
         self.user_id = user_id
-        self.valence = valence
-        self.arousal = arousal
+        self.value = value
         self.time_stamp = time_stamp
 
     def __repr__(self):
@@ -80,8 +85,8 @@ class Emotion(db.Model):
         return emotion
 
     @classmethod
-    def save_emotion(cls, meeting_id, user_id, valence, arousal, time_stamp=datetime.now()):
-        emotion = cls(meeting_id, user_id, valence, arousal, time_stamp)
+    def save_emotion(cls, meeting_id, user_id, value, time_stamp=datetime.now()):
+        emotion = cls(meeting_id, user_id, value, time_stamp)
         db.session.add(emotion)
         db.session.commit()
         return emotion
@@ -177,4 +182,6 @@ def first(iterable, default=None):
     for item in iterable:
         return item
     return default
+
+
 
