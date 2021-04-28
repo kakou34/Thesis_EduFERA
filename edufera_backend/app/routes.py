@@ -2,7 +2,7 @@ import itertools
 import operator
 from flask import request, make_response, jsonify
 from flask import current_app as app
-from .models import Meeting, Attendance
+from .models import Meeting, Attendance, User
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
 
 
@@ -34,6 +34,19 @@ def get_meeting():
                 f'Meeting: {meeting_id} does not exist!'
             )
 
+@app.route('/end_meeting', methods=['GET'])
+def end_meeting():
+    meeting_id = request.args.get('meeting_id')
+    if meeting_id:
+        the_meeting = Meeting.get_meeting(meeting_id)
+        the_meeting.end_meeting()
+        if the_meeting:
+            return {'ended_meeting' : the_meeting}
+        return make_response(
+                f'Meeting: {meeting_id} does not exsist!'
+            )
+
+
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
     result_dic = []
@@ -45,6 +58,36 @@ def past_meetings():
 
     return result_dic
 
+@app.route('/join_meeting', methods=['GET'])
+def join_meeting():
+    meeting_id = request.args.get('meeting_id')
+    user_id = request.args.get('user_id')
+    join_time = request.args.get('join_time')
+    user_name = request.args.get('user_name ')
+
+    attendance = Attendance.query.filter_by(user_id=user_id, meeting_id=meeting_id)
+    if attendance:
+        return f'attendace : User previously joined a meeting with meeting id {attendance.meeting_id}'
+    meeting = Meeting.get_meeting(meeting_id)
+    if meeting:
+        user = User.get_user(user_id)
+        if user:
+            new_attendance = Attendance.create_attendance(meeting_id, user_id, join_time)
+            return new_attendance
+        else:
+            return f'User with is {user_id} does not exist'
+    else:
+        return f'metting with id {meeting_id} does not exist!'
+
+@app.route('/user_by_meeting', methods=['GET'])
+def user_by_meeting():
+    meeting_id = request.args.get('meeting_id')
+    for meeting in past_meetings:
+        get_attr = operator.attrgetter('time_stamp')
+        time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
+        result_dic[meeting.meeting_id] = time_stamp_list
+
+    return result_dic
 
 @app.route('/attendances', methods=['GET'])
 def attendances():
@@ -68,6 +111,6 @@ def generate_attend():
 
 @app.route('/generate_emotions', methods=['GET'])
 def generate_emo():
-    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy_data.csv')
+    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy.csv')
     return make_response('done')
 
