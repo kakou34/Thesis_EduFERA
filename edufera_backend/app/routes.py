@@ -111,6 +111,6 @@ def generate_attend():
 
 @app.route('/generate_emotions', methods=['GET'])
 def generate_emo():
-    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy_data.csv')
+    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy.csv')
     return make_response('done')
 

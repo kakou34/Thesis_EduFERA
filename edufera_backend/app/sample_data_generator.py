@@ -1,7 +1,9 @@
 from edufera_backend.app.models import Meeting, User, Attendance, Emotion
 from datetime import datetime as dt
 import pandas as pd
-from . import db
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 
 def generate_data():
@@ -69,12 +71,31 @@ def generate_emotions(path):
             Emotion(
                 user_id=row[1],
                 meeting_id="204 255 15",
-                time_stamp=dt.strptime(row[0], '%a, %d %B %Y %H:%M:%S'),
-                valence=row[2],
-                arousal=row[3]
+                time_stamp=dt.strptime(row['time'], '%a, %d %B %Y %H:%M:%S'),
+                value=row['emotion']
             )
             for i, row in df.iterrows()
         ],
         return_defaults=True,
     )
     db.session.commit()
+
+
+if __name__ == "__main__":
+    df = pd.read_csv('dummy_data.csv')
+    emotions = []
+    for i, row in df.iterrows():
+        if row['valence'] > 0 and row['arousal'] > 0:
+            emotions.append(0)
+        elif row['valence'] < 0 and row['arousal'] > 0:
+            emotions.append(1)
+        elif row['valence'] < 0 and row['arousal'] < 0:
+            emotions.append(2)
+        else:
+            emotions.append(3)
+
+    df.drop(columns=['valence', 'arousal'])
+
+    df['emotion'] = emotions
+
+    df.to_csv('dummy.csv')

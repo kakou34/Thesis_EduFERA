@@ -68,7 +68,7 @@ class Emotion(db.Model):
     meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
-    value = db.Column(db.Enum(EmotionEnum))
+    value = db.Column(db.Integer, nullable=False)
 
     def __init__(self, meeting_id, user_id, value, time_stamp):
         self.meeting_id = meeting_id
