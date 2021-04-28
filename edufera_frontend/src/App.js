@@ -7,6 +7,8 @@ import PastMeetingsPage from './pages/PastMeetingsPage/pastMeetingsPage.componen
 import Header from './components/header/header.component';
 import CurrentMeetingPage from './pages/CurrentMeetingPage/currentMeetingPage.component';
 import UsersPage from './pages/UsersPage/usersPage.component'
+import StartMeetingPage from './pages/StartMeetingPage/startMeetingPage.component'
+
 
 class App extends React.Component {
  constructor() {
@@ -30,6 +32,8 @@ class App extends React.Component {
       <Route exact path='/' component={PastMeetingsPage} />
       <Route exact path='/currentMeeting' component={CurrentMeetingPage} />
       <Route path='/usersPage' component={UsersPage} />
+      <Route path='/startAnalysis' component={StartMeetingPage} />
+      
 
      </Switch>
     </div>

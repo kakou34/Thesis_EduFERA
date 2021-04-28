@@ -3,6 +3,7 @@ import './meetings-directory.styles.scss';
 
 import SearchBox from '../search-box/search-box.component';
 import MeetingsListItems from '../meetings-list-items/meetings-list-items.compopnent';
+import {data} from '../../data/dummydata'
 
 class MeetingsDirectory extends React.Component {
 

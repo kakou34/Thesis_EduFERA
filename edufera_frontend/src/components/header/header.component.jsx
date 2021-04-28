@@ -13,7 +13,7 @@ const Header = () => (
    
      
      <div className='options'>
-      <Link className='option' to ='/currentMeeting' >Current Meeting</Link>
+      <Link className='option' to ='/startAnalysis' >Current Meeting</Link>
       <Link className='option' to ='/' >Past Meetings</Link>
 
      </div>
