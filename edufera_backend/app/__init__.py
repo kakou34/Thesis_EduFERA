@@ -13,6 +13,6 @@ def init_app():
 
     with app.app_context():
         from . import routes  # Import routes
-        db.create_all()  # Create sql tables for our data models
+        db.create_all()  # Create sql tables for our data ml_models
 
         return app

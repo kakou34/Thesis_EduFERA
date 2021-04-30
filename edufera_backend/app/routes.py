@@ -16,8 +16,8 @@ def stream_predict():
         frame = request.files['frame']
         if frame:
             img_bytes = frame.read()
-            [valence, arousal] = streamer.predict([img_bytes])[0]
-            return jsonify({'valence': valence, 'arousal': arousal})
+            emotion = streamer.predict([img_bytes])[0]
+            return {'emotion': emotion}
 
 
 @app.route('/start_meeting', methods=['GET'])
@@ -72,6 +72,7 @@ def past_meetings():
 
     return result_dic
 
+
 @app.route('/join_meeting', methods=['GET'])
 def join_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -93,15 +94,18 @@ def join_meeting():
     else:
         return f'metting with id {meeting_id} does not exist!'
 
+
 @app.route('/user_by_meeting', methods=['GET'])
 def user_by_meeting():
     meeting_id = request.args.get('meeting_id')
+    result_dic = []
     for meeting in past_meetings:
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
         result_dic[meeting.meeting_id] = time_stamp_list
 
     return result_dic
+
 
 @app.route('/attendances', methods=['GET'])
 def attendances():

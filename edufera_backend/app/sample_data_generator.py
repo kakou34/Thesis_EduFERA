@@ -1,9 +1,7 @@
 from edufera_backend.app.models import Meeting, User, Attendance, Emotion
 from datetime import datetime as dt
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from . import db
 
 
 def generate_data():
