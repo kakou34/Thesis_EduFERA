@@ -37,7 +37,7 @@ class MeetingsListItems extends React.Component {
             </div>
             <div className='btnContainer'>
              <div className='btnListOfUsers'>
-             <Link className='usersLink' style={{textDecoration: 'none', color:'white'}} to="/usersPage">Students's details</Link>
+             <Link className='usersLink' style={{textDecoration: 'none', color:'white'}} to="/usersPage">Student Details</Link>
              </div>
             </div>
            </div>
