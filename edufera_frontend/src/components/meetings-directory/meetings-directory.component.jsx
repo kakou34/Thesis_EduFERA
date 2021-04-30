@@ -39,10 +39,9 @@ class MeetingsDirectory extends React.Component {
 
 
     render() {
-        const {searchField, meetingsDates} = this.state;
+        const {meetingsDates,searchField } = this.state;
         const filteredDates = meetingsDates.filter(meetingDate =>
-            meetingDate.title.toLowerCase().includes(searchField.toLowerCase())
-            );
+            meetingDate.title.toLowerCase().includes(searchField.toLowerCase()))
 
         return (
             <div className='directory-items'>
@@ -51,13 +50,13 @@ class MeetingsDirectory extends React.Component {
              handleChange = {e => this.setState({searchField: e.target.value})} 
              />
              <div className='container'>
-             {this.state.meetingsDates.map(({title, id}) => (
+             {filteredDates.map(({title, id}) => (
                 <MeetingsListItems className='listItem' key={id} title = {title}/>
             )   
             )}
              </div>
             </div>
-        );
+        )
     }
     
 }
