@@ -174,7 +174,8 @@ class Meeting(db.Model):
 
     @classmethod
     def get_past_meetings(cls):
-        meetings = cls.query.filter_by(cls.end_time < datetime.now()).all()
+        current_time = datetime.now()
+        meetings = cls.query.filter(cls.end_time < current_time).all()
         return meetings
 
 

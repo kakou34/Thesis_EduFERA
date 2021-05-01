@@ -78,12 +78,12 @@ def end_meeting():
 def past_meetings():
     result_dic = []
     past_meetings = Meeting.get_past_meetings()
-    for meeting in past_meetings:
-        get_attr = operator.attrgetter('time_stamp')
-        time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
-        result_dic[meeting.meeting_id] = time_stamp_list
+    # for meeting in past_meetings:
+    #     get_attr = operator.attrgetter('time_stamp')
+    #     time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
+    #     result_dic[meeting.meeting_id] = time_stamp_list
 
-    return result_dic
+    return jsonify(past_meetings)
 
 
 @app.route('/join_meeting', methods=['GET'])
