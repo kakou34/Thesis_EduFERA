@@ -26,7 +26,7 @@ class Attendance(db.Model):
     def __init__(self, meeting_id, user_id, join_time):
         self.meeting_id = meeting_id
         self.user_id = user_id
-        self.join_time = join_time
+        self.join_time = join_time.replace(microsecond=0)
 
     def __repr__(self):
         return f"{self.id}:{self.meeting_id}, {self.user_id}"
@@ -37,8 +37,8 @@ class Attendance(db.Model):
         return attendance
 
     @classmethod
-    def create_attendance(cls, meeting_id, user_id, join_time=datetime.now):
-        attendance = cls(meeting_id, user_id, join_time)
+    def create_attendance(cls, meeting_id, user_id, join_time=datetime.now()):
+        attendance = cls(meeting_id, user_id, join_time.replace(microsecond=0))
         db.session.add(attendance)
         db.session.commit()
         return attendance
@@ -74,10 +74,10 @@ class Emotion(db.Model):
         self.meeting_id = meeting_id
         self.user_id = user_id
         self.value = value
-        self.time_stamp = time_stamp
+        self.time_stamp = time_stamp.replace(microsecond=0)
 
     def __repr__(self):
-        return f"{self.time_stamp}:{self.valence}, {self.arousal}"
+        return f"{self.time_stamp}:{self.value}"
 
     @classmethod
     def get_emotion(cls, emotion_id):
@@ -86,7 +86,7 @@ class Emotion(db.Model):
 
     @classmethod
     def save_emotion(cls, meeting_id, user_id, value, time_stamp=datetime.now()):
-        emotion = cls(meeting_id, user_id, value, time_stamp)
+        emotion = cls(meeting_id, user_id, value, time_stamp.replace(microsecond=0))
         db.session.add(emotion)
         db.session.commit()
         return emotion
@@ -157,7 +157,7 @@ class Meeting(db.Model):
         return meeting
 
     @classmethod
-    def start_meeting(cls, meeting_id, start_time=datetime.now()):
+    def start_meeting(cls, meeting_id, start_time=datetime.now().replace(microsecond=0)):
         meeting = cls(meeting_id, start_time)
         db.session.add(meeting)
         db.session.commit()
@@ -167,14 +167,14 @@ class Meeting(db.Model):
     @classmethod
     def end_meeting(cls, meeting_id, end_time=datetime.now()):
         meeting = cls.query.filter_by(meeting_id=meeting_id).first()
-        meeting.end_time = end_time
+        meeting.end_time = end_time.replace(microsecond=0)
         db.session.commit()
 
         return meeting
 
     @classmethod
     def get_past_meetings(cls):
-        current_time = datetime.now()
+        current_time = datetime.now().replace(microsecond=0)
         meetings = cls.query.filter(cls.end_time < current_time).all()
         return meetings
 

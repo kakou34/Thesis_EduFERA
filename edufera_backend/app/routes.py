@@ -24,6 +24,7 @@ def stream_predict():
     if user and meeting and frame:
         img_bytes = frame.read()
         emotion = streamer.predict([img_bytes])[0]
+        time_stamp.replace(microsecond=0)
         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
         return {'emotion': emotion}
     else:
@@ -39,7 +40,7 @@ def start_meeting():
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
             return make_response(
-                f'Meeting: {meeting_id} already exists!'
+                f'Meeting: {meeting_id} already started!'
             )
         new_meeting = Meeting.start_meeting(meeting_id=meeting_id)
         return {'id': new_meeting.id,
@@ -53,9 +54,7 @@ def get_meeting():
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
-            return {'id': existing_meeting.id,
-                    'meeting_id': existing_meeting.meeting_id,
-                    'start_time': existing_meeting.start_time}
+            return jsonify(existing_meeting)
         return make_response(
                 f'Meeting: {meeting_id} does not exist!'
             )
@@ -66,9 +65,11 @@ def end_meeting():
     meeting_id = request.args.get('meeting_id')
     if meeting_id:
         the_meeting = Meeting.get_meeting(meeting_id)
-        the_meeting.end_meeting()
         if the_meeting:
-            return {'ended_meeting': the_meeting}
+            the_meeting.end_meeting()
+            return make_response(
+                f'Meeting: {meeting_id} ended!'
+            )
         return make_response(
                 f'Meeting: {meeting_id} does not exsist!'
             )
@@ -76,14 +77,24 @@ def end_meeting():
 
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
-    result_dic = []
+    result_dic = {}
     past_meetings = Meeting.get_past_meetings()
-    # for meeting in past_meetings:
-    #     get_attr = operator.attrgetter('time_stamp')
-    #     time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
-    #     result_dic[meeting.meeting_id] = time_stamp_list
 
-    return jsonify(past_meetings)
+    for meeting in past_meetings:
+        emotions_dict = {}
+        get_attr = operator.attrgetter('time_stamp')
+        time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
+
+        for time_list in time_stamp_list:
+            student_no = [0]*5  # stores the number of students in each class at current time
+
+            for emotion in time_list:
+                student_no[int(emotion.value)] += 1
+            emotions_dict[str(time_list[0].time_stamp)] = student_no
+
+        result_dic[meeting.meeting_id] = emotions_dict
+
+    return result_dic
 
 
 @app.route('/join_meeting', methods=['GET'])
