@@ -303,3 +303,5 @@ sketch
 *.pkl
 
 # End of https://www.toptal.com/developers/gitignore/api/flask,react,pycharm
+/edufera_backend/app/img.jpg
+/edufera_backend/app/giroud.jpg
