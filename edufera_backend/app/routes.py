@@ -1,8 +1,9 @@
 import itertools
 import operator
+from datetime import datetime as dt
 from flask import request, make_response, jsonify
 from flask import current_app as app
-from .models import Meeting, Attendance, User
+from .models import Meeting, Attendance, User, Emotion
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
 from edufera_backend.app.ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
@@ -12,12 +13,23 @@ streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 
 @app.route('/stream_predict', methods=['POST'])
 def stream_predict():
-    if request.method == 'POST':
-        frame = request.files['frame']
-        if frame:
-            img_bytes = frame.read()
-            emotion = streamer.predict([img_bytes])[0]
-            return {'emotion': emotion}
+    frame = request.files['frame']
+    meeting_id = request.form.get('meeting_id')
+    user_id = request.form.get('user_id')
+    time_stamp = request.form.get('time_stamp')
+    user = User.get_user(user_id)
+    meeting = Meeting.get_meeting(meeting_id)
+    if not time_stamp:
+        time_stamp = dt.now()
+    if user and meeting and frame:
+        img_bytes = frame.read()
+        emotion = streamer.predict([img_bytes])[0]
+        Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
+        return {'emotion': emotion}
+    else:
+        return make_response(
+            'An error happened! Please make sure to provide the correct parameters.'
+        )
 
 
 @app.route('/start_meeting', methods=['GET'])
@@ -29,7 +41,7 @@ def start_meeting():
             return make_response(
                 f'Meeting: {meeting_id} already exists!'
             )
-        new_meeting = Meeting.start_meeting(meeting_id=meeting_id)  # Create an instance of the User class
+        new_meeting = Meeting.start_meeting(meeting_id=meeting_id)
         return {'id': new_meeting.id,
                 'meeting_id': new_meeting.meeting_id,
                 'start_time': new_meeting.start_time}
@@ -48,6 +60,7 @@ def get_meeting():
                 f'Meeting: {meeting_id} does not exist!'
             )
 
+
 @app.route('/end_meeting', methods=['GET'])
 def end_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -55,7 +68,7 @@ def end_meeting():
         the_meeting = Meeting.get_meeting(meeting_id)
         the_meeting.end_meeting()
         if the_meeting:
-            return {'ended_meeting' : the_meeting}
+            return {'ended_meeting': the_meeting}
         return make_response(
                 f'Meeting: {meeting_id} does not exsist!'
             )
