@@ -2,29 +2,14 @@ import pandas as pd
 
 
 if __name__ == "__main__":
-    df = pd.read_csv('D:/Studies/PFE/dataset/newtest.csv')
+    df = pd.read_csv('D:/Studies/PFE/fer2013p/train.csv')
 
-    for i, row in df.iterrows():
-        valence = df.at[i, 'valence']
-        arousal = df.at[i, 'arousal']
+    class0 = df[df['class'] == 0]
+    class1 = df[df['class'] == 1]
+    class2 = df[df['class'] == 2]
+    class3 = df[df['class'] == 3]
 
-        if valence > 0 and arousal > 0:
-            df.at[i, 'class'] = 1
-
-        elif valence < 0 and arousal > 0:
-            df.at[i, 'class'] = 2
-
-        elif valence <= 0 and arousal <= 0:
-            df.at[i, 'class'] = 3
-
-        else:
-            df.at[i, 'class'] = 4
-
-    df.drop(columns=[
-                     'valence',
-                     'arousal',
-                     'expression',
-                     'face_x', 'face_y',
-                     'face_height', 'face_width'])
-
-    df.to_csv("D:/Studies/PFE/AffectNet/classification_test.csv")
+    print(len(class0))
+    print(len(class1))
+    print(len(class2))
+    print(len(class3))

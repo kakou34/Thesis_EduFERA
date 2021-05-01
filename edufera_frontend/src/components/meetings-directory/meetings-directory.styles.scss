@@ -1,0 +1,23 @@
+.directory-items {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .container {
+    min-width: 80%;
+    min-height: 400px;
+    height: auto;
+   // flex: 1 1 auto;
+    flex-direction: column;
+   // display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    border: 4px solid #0CF7DA;
+    margin: 0 7.5px 15px;
+    .listItem {
+      border: 4px solid #0CF7DA;
+    }
+}

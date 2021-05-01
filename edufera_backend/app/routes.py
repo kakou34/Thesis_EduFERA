@@ -1,9 +1,36 @@
 import itertools
 import operator
+from datetime import datetime as dt
 from flask import request, make_response, jsonify
 from flask import current_app as app
-from .models import Meeting, Attendance, User
+from .models import Meeting, Attendance, User, Emotion
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
+from edufera_backend.app.ml_model import batch_prediction
+from service_streamer import ThreadedStreamer
+
+streamer = ThreadedStreamer(batch_prediction, batch_size=64)
+
+
+@app.route('/stream_predict', methods=['POST'])
+def stream_predict():
+    frame = request.files['frame']
+    meeting_id = request.form.get('meeting_id')
+    user_id = request.form.get('user_id')
+    time_stamp = request.form.get('time_stamp')
+    user = User.get_user(user_id)
+    meeting = Meeting.get_meeting(meeting_id)
+    if not time_stamp:
+        time_stamp = dt.now()
+    if user and meeting and frame:
+        img_bytes = frame.read()
+        emotion = streamer.predict([img_bytes])[0]
+        time_stamp.replace(microsecond=0)
+        Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
+        return {'emotion': emotion}
+    else:
+        return make_response(
+            'An error happened! Please make sure to provide the correct parameters.'
+        )
 
 
 @app.route('/start_meeting', methods=['GET'])
@@ -13,9 +40,9 @@ def start_meeting():
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
             return make_response(
-                f'Meeting: {meeting_id} already exists!'
+                f'Meeting: {meeting_id} already started!'
             )
-        new_meeting = Meeting.start_meeting(meeting_id=meeting_id)  # Create an instance of the User class
+        new_meeting = Meeting.start_meeting(meeting_id=meeting_id)
         return {'id': new_meeting.id,
                 'meeting_id': new_meeting.meeting_id,
                 'start_time': new_meeting.start_time}
@@ -27,21 +54,22 @@ def get_meeting():
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
-            return {'id': existing_meeting.id,
-                    'meeting_id': existing_meeting.meeting_id,
-                    'start_time': existing_meeting.start_time}
+            return jsonify(existing_meeting)
         return make_response(
                 f'Meeting: {meeting_id} does not exist!'
             )
+
 
 @app.route('/end_meeting', methods=['GET'])
 def end_meeting():
     meeting_id = request.args.get('meeting_id')
     if meeting_id:
         the_meeting = Meeting.get_meeting(meeting_id)
-        the_meeting.end_meeting()
         if the_meeting:
-            return {'ended_meeting' : the_meeting}
+            the_meeting.end_meeting()
+            return make_response(
+                f'Meeting: {meeting_id} ended!'
+            )
         return make_response(
                 f'Meeting: {meeting_id} does not exsist!'
             )
@@ -49,14 +77,25 @@ def end_meeting():
 
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
-    result_dic = []
+    result_dic = {}
     past_meetings = Meeting.get_past_meetings()
+
     for meeting in past_meetings:
+        emotions_dict = {}
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
-        result_dic[meeting.meeting_id] = time_stamp_list
+
+        for time_list in time_stamp_list:
+            student_no = [0]*5  # stores the number of students in each class at current time
+
+            for emotion in time_list:
+                student_no[int(emotion.value)] += 1
+            emotions_dict[str(time_list[0].time_stamp)] = student_no
+
+        result_dic[meeting.meeting_id] = emotions_dict
 
     return result_dic
+
 
 @app.route('/join_meeting', methods=['GET'])
 def join_meeting():
@@ -79,15 +118,18 @@ def join_meeting():
     else:
         return f'metting with id {meeting_id} does not exist!'
 
+
 @app.route('/user_by_meeting', methods=['GET'])
 def user_by_meeting():
     meeting_id = request.args.get('meeting_id')
+    result_dic = []
     for meeting in past_meetings:
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
         result_dic[meeting.meeting_id] = time_stamp_list
 
     return result_dic
+
 
 @app.route('/attendances', methods=['GET'])
 def attendances():
