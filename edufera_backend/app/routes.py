@@ -3,10 +3,12 @@ import operator
 from datetime import datetime as dt
 from flask import request, make_response, jsonify
 from flask import current_app as app
+from edufera_backend.wsgi import socketio
 from .models import Meeting, Attendance, User, Emotion
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
 from edufera_backend.app.ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
+from flask_socketio import emit
 
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 
@@ -139,6 +141,13 @@ def attendances():
     return jsonify(attendances)
 
 
+# Socket routes
+@socketio.on('my event')
+def test_message(message):
+    emit('my response', {'data': 'got it!'})
+
+
+# Routes to generate dummy data
 @app.route('/generate_data', methods=['GET'])
 def generate():
     generate_data()

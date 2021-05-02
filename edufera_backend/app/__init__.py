@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 
 db = SQLAlchemy()
 
@@ -11,8 +12,9 @@ def init_app():
 
     db.init_app(app)
 
+
     with app.app_context():
         from . import routes  # Import routes
         db.create_all()  # Create sql tables for our data ml_models
-
-        return app
+        socketio = SocketIO(app)
+        return app, socketio

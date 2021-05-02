@@ -1,7 +1,7 @@
 """App entry point."""
 from edufera_backend.app import init_app
 
-app = init_app()
+app, socketio = init_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    socketio.run(app)
