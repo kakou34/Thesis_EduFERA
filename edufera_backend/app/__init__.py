@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
+from flask_cors import CORS
 
 db = SQLAlchemy()
 
@@ -12,9 +13,10 @@ def init_app():
 
     db.init_app(app)
 
+    CORS(app)
 
     with app.app_context():
         from . import routes  # Import routes
         db.create_all()  # Create sql tables for our data ml_models
-        socketio = SocketIO(app)
+        socketio = SocketIO(app, cors_allowed_origins='*')
         return app, socketio

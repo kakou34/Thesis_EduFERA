@@ -8,7 +8,8 @@ from .models import Meeting, Attendance, User, Emotion
 from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
 from edufera_backend.app.ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
-from flask_socketio import emit
+from flask_socketio import emit, join_room, send
+from flask_cors import cross_origin
 
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 
@@ -137,14 +138,27 @@ def user_by_meeting():
 def attendances():
     meeting_id = request.args.get('meeting_id')
     attendances = Attendance.get_attendance_by_meeting_id(meeting_id)
-
-    return jsonify(attendances)
+    if attendances:
+        return jsonify(attendances)
+    else:
+        make_response(
+            'Attendances not found!'
+        )
 
 
 # Socket routes
-@socketio.on('my event')
-def test_message(message):
-    emit('my response', {'data': 'got it!'})
+@cross_origin()
+@socketio.on('join_room')
+def on_join(data):
+    room = data['room']
+    join_room(room)
+    send('You joined ' + str(data['room']), to=room)
+
+
+@socketio.on('send_data')
+def on_data_sent(data):
+    room = data['room']
+    emit('data_sent', data, room=room)
 
 
 # Routes to generate dummy data
