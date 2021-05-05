@@ -1,14 +1,23 @@
 import React, {useState, useEffect} from 'react';
 import './currentMeetingPage.syles.scss';
-import io from "socket.io-client";
+// import SocketIOClient from "socket.io-client";
+import SocketIOClient from 'socket.io-client';
 import { useParams } from 'react-router-dom'
 
 let socket;
 
 export const initiateSocket = (room) => {
-    socket = io('http://127.0.0.1:5000');
-    console.log(`Connecting socket...`);
-    if (socket && room) socket.emit('join_room', room);
+    // socket = SocketIOClient('http://127.0.0.1:5000');
+    // console.log(socket);
+    // console.log('room: ' + room)
+    // if (socket && room) socket.emit('connecttt');
+    socket = SocketIOClient('http://127.0.0.1:5000');
+    console.log(socket);
+    console.log('room: ' + room)
+    if (socket && room) {
+        console.log('I am emitting')
+        socket.emit('aaa');
+    }
 }
 
 export const disconnectSocket = () => {
@@ -19,7 +28,7 @@ export const disconnectSocket = () => {
 export const subscribeToAnalysis = (cb) => {
     if (!socket) return true;
 
-    socket.on('data', data => {
+    socket.on('aaa_response', data => {
         console.log('Websocket event received!');
         return cb(null, data);
     });

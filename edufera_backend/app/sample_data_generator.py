@@ -1,7 +1,7 @@
 from edufera_backend.app.models import Meeting, User, Attendance, Emotion
 from datetime import datetime as dt
 import pandas as pd
-from . import db
+from app import db
 
 
 def generate_data():

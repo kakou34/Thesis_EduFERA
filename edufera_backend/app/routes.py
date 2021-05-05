@@ -1,12 +1,15 @@
 import itertools
 import operator
+import sys
+sys.path.append("app")
+sys.path.append("..")
 from datetime import datetime as dt
 from flask import request, make_response, jsonify
 from flask import current_app as app
-from edufera_backend.wsgi import socketio
+from wsgi import socketio
 from .models import Meeting, Attendance, User, Emotion
-from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
-from edufera_backend.app.ml_model import batch_prediction
+# from sample_data_generator import generate_data, generate_attendances, generate_emotions
+from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
 from flask_socketio import emit, join_room, send
 from flask_cors import cross_origin
@@ -29,6 +32,7 @@ def stream_predict():
         emotion = streamer.predict([img_bytes])[0]
         time_stamp.replace(microsecond=0)
         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
+
         return {'emotion': emotion}
     else:
         return make_response(
@@ -146,36 +150,23 @@ def attendances():
         )
 
 
-# Socket routes
-@cross_origin()
-@socketio.on('join_room')
-def on_join(data):
-    room = data['room']
-    join_room(room)
-    send('You joined ' + str(data['room']), to=room)
-
-
-@socketio.on('send_data')
-def on_data_sent(data):
-    room = data['room']
-    emit('data_sent', data, room=room)
 
 
 # Routes to generate dummy data
-@app.route('/generate_data', methods=['GET'])
-def generate():
-    generate_data()
-    return make_response('done')
-
-
-@app.route('/generate_attendances', methods=['GET'])
-def generate_attend():
-    generate_attendances()
-    return make_response('done')
-
-
-@app.route('/generate_emotions', methods=['GET'])
-def generate_emo():
-    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy.csv')
-    return make_response('done')
+# @app.route('/generate_data', methods=['GET'])
+# def generate():
+#     generate_data()
+#     return make_response('done')
+#
+#
+# @app.route('/generate_attendances', methods=['GET'])
+# def generate_attend():
+#     generate_attendances()
+#     return make_response('done')
+#
+#
+# @app.route('/generate_emotions', methods=['GET'])
+# def generate_emo():
+#     generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy.csv')
+#     return make_response('done')
 

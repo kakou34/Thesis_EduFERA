@@ -1,15 +1,11 @@
-import pandas as pd
+from socketIO_client import SocketIO, LoggingNamespace
 
+def on_aaa_response(args):
+    print('on_aaa_response', args['data'])
 
-if __name__ == "__main__":
-    df = pd.read_csv('D:/Studies/PFE/fer2013p/train.csv')
-
-    class0 = df[df['class'] == 0]
-    class1 = df[df['class'] == 1]
-    class2 = df[df['class'] == 2]
-    class3 = df[df['class'] == 3]
-
-    print(len(class0))
-    print(len(class1))
-    print(len(class2))
-    print(len(class3))
+socketIO = SocketIO('localhost', 5000, LoggingNamespace)
+socketIO.on('aaa_response', on_aaa_response)
+print('I will emit')
+socketIO.emit('aaa')
+print('I did emit')
+socketIO.wait(seconds=1)
