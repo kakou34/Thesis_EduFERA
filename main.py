@@ -11,6 +11,7 @@ socketIO.on('meeting_started', on_aaa_response)
 print('I will connect')
 socketIO.emit('connect')
 print('I did connect')
+socketIO.emit('join')
 
 socketIO.wait(seconds=60)
 

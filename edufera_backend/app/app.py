@@ -1,17 +1,43 @@
-import itertools
-import operator
+from flask import jsonify, request, make_response
+from flask_socketio import *
+from flask_cors import CORS, cross_origin
+from models import *
+from settings import *
 from datetime import datetime as dt
-from flask import request, make_response, jsonify
-from flask import current_app as app
-from edufera_backend.wsgi import socketio
-from .models import Meeting, Attendance, User, Emotion
-from edufera_backend.app.sample_data_generator import generate_data, generate_attendances, generate_emotions
-from edufera_backend.app.ml_model import batch_prediction
+from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
-from flask_socketio import emit, join_room, send
-from flask_cors import cross_origin
 
+
+socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
+CORS(app)
+
+
+# SocketIO Events
+@socketio.on('connect')
+def connected():
+    print('Connected')
+
+
+@socketio.on('disconnect')
+def disconnected():
+    print('Disconnected')
+
+
+@socketio.on('join')
+def on_join(data):
+    room = data['room']
+    join_room(room)
+    print('A user has joined room ' + room)
+    send('You have entered the room.', to=room)
+
+
+@socketio.on('leave')
+def on_leave(data):
+    room = data['room']
+    leave_room(room)
+    print('A user has left room ' + room)
+    send('You have left the room.', to=room)
 
 
 @app.route('/stream_predict', methods=['POST'])
@@ -27,7 +53,8 @@ def stream_predict():
     if user and meeting and frame:
         img_bytes = frame.read()
         emotion = streamer.predict([img_bytes])[0]
-        time_stamp.replace(microsecond=0)
+        time_stamp = time_stamp.replace(microsecond=0)
+        socketio.emit('emotion_predicted', {'time_stamp': str(time_stamp), 'value': emotion}, to=meeting_id)
         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
         return {'emotion': emotion}
     else:
@@ -42,10 +69,12 @@ def start_meeting():
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
+            socketio.emit('meeting_started', {'data': 'Started'}, broadcast=True, to=meeting_id)
             return make_response(
                 f'Meeting: {meeting_id} already started!'
             )
         new_meeting = Meeting.start_meeting(meeting_id=meeting_id)
+        socketio.emit('meeting_started', {'data': f'Meeting {meeting_id} Started!'}, broadcast=True, to=meeting_id)
         return {'id': new_meeting.id,
                 'meeting_id': new_meeting.meeting_id,
                 'start_time': new_meeting.start_time}
@@ -63,12 +92,29 @@ def get_meeting():
             )
 
 
+@app.route('/get_meeting_status')
+def get_meeting_status():
+    meeting_id = request.args.get('meeting_id')
+    message = 'Not Started'
+    if meeting_id:
+        existing_meeting = Meeting.get_meeting(meeting_id)
+        if existing_meeting:
+            if existing_meeting.end_time:
+                message = 'Ended'
+            else:
+                message = 'Started'
+        response = jsonify(message=message)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
+
+
 @app.route('/end_meeting', methods=['GET'])
 def end_meeting():
     meeting_id = request.args.get('meeting_id')
     if meeting_id:
         the_meeting = Meeting.get_meeting(meeting_id)
         if the_meeting:
+            socketio.emit('meeting_started', {'data': 'Ended'}, broadcast=True, to=meeting_id)
             the_meeting.end_meeting()
             return make_response(
                 f'Meeting: {meeting_id} ended!'
@@ -146,36 +192,10 @@ def attendances():
         )
 
 
-# Socket routes
-@cross_origin()
-@socketio.on('join_room')
-def on_join(data):
-    room = data['room']
-    join_room(room)
-    send('You joined ' + str(data['room']), to=room)
+@app.route('/test')
+def test():
+    return jsonify({'message': 'Hello'})
 
 
-@socketio.on('send_data')
-def on_data_sent(data):
-    room = data['room']
-    emit('data_sent', data, room=room)
-
-
-# Routes to generate dummy data
-@app.route('/generate_data', methods=['GET'])
-def generate():
-    generate_data()
-    return make_response('done')
-
-
-@app.route('/generate_attendances', methods=['GET'])
-def generate_attend():
-    generate_attendances()
-    return make_response('done')
-
-
-@app.route('/generate_emotions', methods=['GET'])
-def generate_emo():
-    generate_emotions('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/edufera_backend/app/dummy.csv')
-    return make_response('done')
-
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
