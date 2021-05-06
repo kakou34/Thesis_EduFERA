@@ -7,6 +7,7 @@ import Header from './components/header/header.component';
 import CurrentMeetingPage from "./pages/currentMeetingPage/currentMeetingPage.component";
 import UsersPage from "./pages/usersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
+import Dashboard from "./Dashboard";
 
 
 class App extends React.Component {
@@ -32,6 +33,7 @@ class App extends React.Component {
                     <Route exact path='/current/:meetingId' component={CurrentMeetingPage}/>
                     <Route exact path='/usersPage' component={UsersPage}/>
                     <Route exact path='/startAnalysis' component={StartMeetingPage}/>
+                    <Route exact path='/dashboard' component={Dashboard}/>
                 </Switch>
 
             </div>

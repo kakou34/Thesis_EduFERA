@@ -8,4 +8,5 @@ socketIO.on('aaa_response', on_aaa_response)
 print('I will emit')
 socketIO.emit('aaa')
 print('I did emit')
+
 socketIO.wait(seconds=1)
