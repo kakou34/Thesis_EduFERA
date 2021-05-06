@@ -1,45 +1,20 @@
 import React, {useState, useEffect} from 'react';
 import './currentMeetingPage.syles.scss';
-import io from "socket.io-client";
-import { useParams } from 'react-router-dom'
-
-let socket;
-
-export const initiateSocket = (room) => {
-    socket = io('http://127.0.0.1:5000');
-    console.log(`Connecting socket...`);
-    if (socket && room) socket.emit('join_room', room);
-}
-
-export const disconnectSocket = () => {
-    console.log('Disconnecting socket...');
-    if (socket) socket.disconnect();
-}
-
-export const subscribeToAnalysis = (cb) => {
-    if (!socket) return true;
-
-    socket.on('data', data => {
-        console.log('Websocket event received!');
-        return cb(null, data);
-    });
-}
+import { socket } from '../../App'
 
 
 const CurrentMeetingPage = (props) => {
     const roomId = props.match.params.meetingId // Gets roomId (meetingId) from URL
-    const [data, setData] = useState('');
+    const [data, setData] = useState('Data');
 
     useEffect(() => {
-        console.log(roomId)
-        if (roomId) initiateSocket(roomId);
-        subscribeToAnalysis((err, data) => {
-            if (err) return;
-            setData(oldData => [data, ...oldData])
-        });
-        return () => {
-            disconnectSocket();
-        }
+        console.log(socket)
+        socket.emit('hello', {'data' : 'hello'})
+        socket.on('meeting_started', (resp) => {
+        console.log(resp)
+            setData(resp)
+    });
+
     }, [roomId]);
 
 
@@ -48,7 +23,7 @@ const CurrentMeetingPage = (props) => {
             <div className='meetingContainer'>
 
                 <div className='diagramCurrent-container'>
-                    <div className='diagramCurrent'>{data}</div>
+                    <div className='diagramCurrent'>{data.data}</div>
                 </div>
                 <div className='txt-container'>
                     <p className='txt'>Online Students:</p>

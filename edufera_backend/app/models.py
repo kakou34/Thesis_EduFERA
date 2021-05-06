@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from . import db
+from settings import app
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy(app)
 
 
 class EmotionEnum(Enum):

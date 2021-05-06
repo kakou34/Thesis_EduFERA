@@ -7,7 +7,10 @@ import Header from './components/header/header.component';
 import CurrentMeetingPage from "./pages/currentMeetingPage/currentMeetingPage.component";
 import UsersPage from "./pages/usersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
+import UserList from "./websocket";
+import io from 'socket.io-client'
 
+export const socket = io.connect('http://localhost:5000/', {transports: ['websocket'], upgrade: false})
 
 class App extends React.Component {
     constructor() {
@@ -32,6 +35,7 @@ class App extends React.Component {
                     <Route exact path='/current/:meetingId' component={CurrentMeetingPage}/>
                     <Route exact path='/usersPage' component={UsersPage}/>
                     <Route exact path='/startAnalysis' component={StartMeetingPage}/>
+                    <Route exact path='/test' component={UserList}/>
                 </Switch>
 
             </div>
