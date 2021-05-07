@@ -7,7 +7,7 @@ from resnet50_ferplus_dag import resnet50_ferplus_dag
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = resnet50_ferplus_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/resnet50.pth')
+model = resnet50_ferplus_dag()
 model.to(device)
 model.eval()
 

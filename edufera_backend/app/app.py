@@ -1,3 +1,6 @@
+import itertools
+import operator
+
 from flask import jsonify, request, make_response
 from flask_socketio import *
 from flask_cors import CORS, cross_origin
@@ -61,7 +64,7 @@ def stream_predict():
             'An error happened! Please make sure to provide the correct parameters.'
         )
 
-
+#TODO post
 @app.route('/start_meeting', methods=['GET'])
 def start_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -106,7 +109,7 @@ def get_meeting_status():
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
-
+#TODO post
 @app.route('/end_meeting', methods=['GET'])
 def end_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -122,7 +125,7 @@ def end_meeting():
             f'Meeting: {meeting_id} does not exsist!'
         )
 
-
+#TODO
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
     result_dic = {}
@@ -144,7 +147,7 @@ def past_meetings():
 
     return result_dic
 
-
+#TODO create user if user no
 @app.route('/join_meeting', methods=['POST'])
 def join_meeting():
     meeting_id = request.form.get('meeting_id')
@@ -165,7 +168,12 @@ def join_meeting():
                 return f'meeting with id {meeting_id} does not exist!'
             else:
                 if not the_user:
-                    return f'user with id {user_id} does not exist!'
+                    if not user_name:
+                        user_name = 'hidden'
+                    User.add_user(user_id, user_name)
+                    joinTime = datetime.fromisoformat(join_time)
+                    Attendance.create_attendance(the_meeting.id, the_user.id, joinTime)
+                    return f'attendance created!'
                 else:
                     # "2012-12-12 10:10:10" format
                     joinTime = datetime.fromisoformat(join_time)
