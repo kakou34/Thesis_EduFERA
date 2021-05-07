@@ -1,30 +1,18 @@
-import pandas as pd
+from socketIO_client import SocketIO, LoggingNamespace
 
 
-if __name__ == "__main__":
-    df = pd.read_csv('D:/Studies/PFE/dataset/newtest.csv')
+def on_aaa_response(args):
+    print('Notification: ', args['data'])
 
-    for i, row in df.iterrows():
-        valence = df.at[i, 'valence']
-        arousal = df.at[i, 'arousal']
 
-        if valence > 0 and arousal > 0:
-            df.at[i, 'class'] = 1
+socketIO = SocketIO('localhost', 5000, LoggingNamespace)
 
-        elif valence < 0 and arousal > 0:
-            df.at[i, 'class'] = 2
+socketIO.on('meeting_started', on_aaa_response)
+print('I will connect')
+socketIO.emit('connect')
+print('I did connect')
+socketIO.emit('join')
 
-        elif valence <= 0 and arousal <= 0:
-            df.at[i, 'class'] = 3
+socketIO.wait(seconds=60)
 
-        else:
-            df.at[i, 'class'] = 4
-
-    df.drop(columns=[
-                     'valence',
-                     'arousal',
-                     'expression',
-                     'face_x', 'face_y',
-                     'face_height', 'face_width'])
-
-    df.to_csv("D:/Studies/PFE/AffectNet/classification_test.csv")
+socketIO.emit('disconnect')

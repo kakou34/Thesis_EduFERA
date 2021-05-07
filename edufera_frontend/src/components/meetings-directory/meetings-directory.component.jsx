@@ -1,10 +1,11 @@
 import React from 'react';
-import './directory-items.styles.scss';
+import './meetings-directory.styles.scss';
 
 import SearchBox from '../search-box/search-box.component';
-import ListItem from '../list-item/list-item.compopnent';
+import MeetingsListItems from '../meetings-list-items/meetings-list-items.compopnent';
+import {data} from '../../data/dummydata'
 
-class DirectoryItems extends React.Component {
+class MeetingsDirectory extends React.Component {
 
     constructor() {
         super();
@@ -12,22 +13,22 @@ class DirectoryItems extends React.Component {
         this.state = {
             searchField: '',
             meetingsDates: [{
-                title:  'Date 1',
+                title:  'Meeting ID1',
                 id: 1
 
             },
             {
-                title:  'Date 2',
+                title:  'Meeting ID2',
                 id: 2
 
             },
             {
-                title:  'Date 3',
+                title:  'Meeting ID3',
                 id: 3
 
             },
             {
-                title:  'Date 4',
+                title:  'Meeting ID4',
                 id: 4
 
             }, 
@@ -38,27 +39,26 @@ class DirectoryItems extends React.Component {
 
 
     render() {
-        const {searchField, meetingsDates} = this.state;
+        const {meetingsDates,searchField } = this.state;
         const filteredDates = meetingsDates.filter(meetingDate =>
-            meetingDate.title.toLowerCase().includes(searchField.toLowerCase())
-            );
+            meetingDate.title.toLowerCase().includes(searchField.toLowerCase()))
 
         return (
             <div className='directory-items'>
              <SearchBox
-             placeholder= 'Search dates'
+             placeholder= 'Search meetings by ID'
              handleChange = {e => this.setState({searchField: e.target.value})} 
              />
              <div className='container'>
-             {this.state.meetingsDates.map(({title, id}) => (
-                <ListItem className='listItem' key={id} title = {title}/>
+             {filteredDates.map(({title, id}) => (
+                <MeetingsListItems className='listItem' key={id} title = {title}/>
             )   
             )}
              </div>
             </div>
-        );
+        )
     }
     
 }
 
-export default DirectoryItems;
+export default MeetingsDirectory;

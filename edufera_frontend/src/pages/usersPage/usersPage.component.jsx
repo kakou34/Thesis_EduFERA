@@ -1,11 +1,11 @@
 import React from 'react';
 import './usersPage.styles.scss';
-import UsersList from '../../components/users-list/users-list.component'
+import UsersDirectory from '../../components/users-directory/users-directory.component'
 
 
 const UsersPage = () => (
     <div className='usersPage'>
-     <UsersList/>
+     <UsersDirectory/>
      
     </div>
 );
