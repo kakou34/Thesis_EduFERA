@@ -18,6 +18,11 @@ const CurrentMeetingPage = (props) => {
             setStatus(resp.data)
         });
 
+        socket.on('meeting_ended', (resp) => {
+            console.log(resp.data)
+            setStatus(resp.data)
+        });
+
         socket.on('emotion_predicted', (resp) => {
             console.log(resp)
             setEmotions(old =>[resp, ...old])

@@ -114,7 +114,7 @@ def end_meeting():
     if meeting_id:
         the_meeting = Meeting.get_meeting(meeting_id)
         if the_meeting:
-            socketio.emit('meeting_started', {'data': 'Ended'}, broadcast=True, to=meeting_id)
+            socketio.emit('meeting_ended', {'data': 'Ended'}, broadcast=True, to=meeting_id)
             the_meeting.end_meeting()
             return make_response(
                 f'Meeting: {meeting_id} ended!'
