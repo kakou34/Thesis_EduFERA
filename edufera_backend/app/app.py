@@ -7,7 +7,6 @@ from datetime import datetime as dt
 from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
 
-
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
@@ -88,8 +87,8 @@ def get_meeting():
         if existing_meeting:
             return jsonify(existing_meeting)
         return make_response(
-                f'Meeting: {meeting_id} does not exist!'
-            )
+            f'Meeting: {meeting_id} does not exist!'
+        )
 
 
 @app.route('/get_meeting_status')
@@ -120,8 +119,8 @@ def end_meeting():
                 f'Meeting: {meeting_id} ended!'
             )
         return make_response(
-                f'Meeting: {meeting_id} does not exsist!'
-            )
+            f'Meeting: {meeting_id} does not exsist!'
+        )
 
 
 @app.route('/past_meetings', methods=['GET'])
@@ -135,7 +134,7 @@ def past_meetings():
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
 
         for time_list in time_stamp_list:
-            student_no = [0]*5  # stores the number of students in each class at current time
+            student_no = [0] * 5  # stores the number of students in each class at current time
 
             for emotion in time_list:
                 student_no[int(emotion.value)] += 1
@@ -146,26 +145,32 @@ def past_meetings():
     return result_dic
 
 
-@app.route('/join_meeting', methods=['GET'])
+@app.route('/join_meeting', methods=['POST'])
 def join_meeting():
-    meeting_id = request.args.get('meeting_id')
-    user_id = request.args.get('user_id')
-    join_time = request.args.get('join_time')
-    user_name = request.args.get('user_name ')
+    meeting_id = request.form.get('meeting_id')
+    user_id = request.form.get('user_id')
+    join_time = request.form.get('join_time')
+    user_name = request.form.get('user_name ')
 
-    attendance = Attendance.query.filter_by(user_id=user_id, meeting_id=meeting_id)
-    if attendance:
-        return f'attendace : User previously joined a meeting with meeting id {attendance.meeting_id}'
-    meeting = Meeting.get_meeting(meeting_id)
-    if meeting:
-        user = User.get_user(user_id)
-        if user:
-            new_attendance = Attendance.create_attendance(meeting_id, user_id, join_time)
-            return new_attendance
+    if meeting_id:
+        the_meeting = Meeting.get_meeting(meeting_id)
+    if user_id:
+        the_user = User.get_user(user_id)
+    if the_meeting and the_user:
+        attendance = Attendance.query.filter_by(user_id=the_user.id, meeting_id=the_meeting.id).first()
+        if attendance:
+            return jsonify(attendance)
         else:
-            return f'User with is {user_id} does not exist'
-    else:
-        return f'metting with id {meeting_id} does not exist!'
+            if not the_meeting:
+                return f'meeting with id {meeting_id} does not exist!'
+            else:
+                if not the_user:
+                    return f'user with id {user_id} does not exist!'
+                else:
+                    # "2012-12-12 10:10:10" format
+                    joinTime = datetime.fromisoformat(join_time)
+                    Attendance.create_attendance(the_meeting.id, the_user.id, joinTime)
+                    return f'attendance created!'
 
 
 @app.route('/user_by_meeting', methods=['GET'])
@@ -195,6 +200,71 @@ def attendances():
 @app.route('/test')
 def test():
     return jsonify({'message': 'Hello'})
+
+
+# ===================
+# USER ROUTES
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    user_id = request.form.get('user_id')
+    user_name = request.form.get('user_name')
+    if user_id:
+        if user_name:
+            User.add_user(user_id, user_name)
+        User.add_user(user_id)
+
+        return f'user with id {user_id} is added!'
+
+
+@app.route('/get_user', methods=['GET'])
+def get_user():
+    user_id = request.args.get('user_id')
+    if user_id:
+        the_user = User.get_user(user_id)
+        if the_user:
+            return jsonify(the_user)
+
+        return f'user with id {user_id} does not exist!'
+
+
+# EMOTION ROUTES
+@app.route('/get_emotion', methods=['GET'])  # get emotion by user and meeting
+def get_emotion():
+    user_id = request.args.get('user_id')
+    meeting_id = request.args.get('meeting_id')
+
+    if user_id and meeting_id:
+        the_user = User.get_user(user_id)
+        the_meeting = Meeting.get_meeting(meeting_id)
+        if the_meeting and the_user:
+            the_emotion = Emotion.query.filter_by(meeting_id=the_meeting.id, user_id=the_user.id).first()
+            return jsonify(the_emotion)
+        else:
+            return f'invalid user or meeting id'
+    else:
+        return f'user id and meeting id missing'
+
+
+@app.route('/save_emotion', methods=['POST'])  # get emotion by user and meeting
+def save_emotion():
+    user_id = request.form.get('user_id')
+    meeting_id = request.form.get('meeting_id')
+    value = request.form.get('value')
+    time_stamp = request.args.get('time')
+    if user_id and meeting_id:
+        the_user = User.get_user(user_id)
+        the_meeting = Meeting.get_meeting(meeting_id)
+        if the_meeting and the_user:
+            if time_stamp:
+                time_stamp = datetime.strptime(time_stamp)
+                Emotion.save_emotion(meeting_id=the_meeting.id, user_id=the_user.id, value=value, time_stamp=time_stamp)
+            Emotion.save_emotion(meeting_id=the_meeting.id, user_id=the_user.id, value=value)
+
+            return f'Emotion Saved'
+        else:
+            return f'invalid user or meeting id'
+    else:
+        return f'user id and meeting id missing'
 
 
 if __name__ == '__main__':
