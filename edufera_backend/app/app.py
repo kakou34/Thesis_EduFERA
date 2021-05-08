@@ -10,6 +10,7 @@ from datetime import datetime as dt
 from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
 
+
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
@@ -137,7 +138,7 @@ def past_meetings():
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
 
         for time_list in time_stamp_list:
-            student_no = [0] * 5  # stores the number of students in each class at current time
+            student_no = [0]*5  # stores the number of students in each class at current time
 
             for emotion in time_list:
                 student_no[int(emotion.value)] += 1
@@ -146,6 +147,19 @@ def past_meetings():
         result_dic[meeting.meeting_id] = emotions_dict
 
     return result_dic
+
+
+@app.route('/meeting_analysis', methods=['GET'])
+def analyse_meeting():
+    meeting_id = request.args.get('meeting_id')
+    if meeting_id:
+        meeting = Meeting.get_meeting(meeting_id)
+        if meeting:
+            emotions = meeting.get_meeting_analysis()
+            return jsonify(emotions)
+
+    return make_response('Invalid Meeting ID')
+
 
 #TODO create user if user no
 @app.route('/join_meeting', methods=['POST'])
