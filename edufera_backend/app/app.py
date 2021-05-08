@@ -128,7 +128,6 @@ def end_meeting():
         )
 
 
-# TODO
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
     result_dic = {}
