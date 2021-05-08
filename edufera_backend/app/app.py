@@ -10,7 +10,6 @@ from datetime import datetime as dt
 from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
 
-
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
@@ -65,7 +64,8 @@ def stream_predict():
             'An error happened! Please make sure to provide the correct parameters.'
         )
 
-#TODO post
+
+# TODO post
 @app.route('/start_meeting', methods=['GET'])
 def start_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -110,7 +110,8 @@ def get_meeting_status():
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
-#TODO post
+
+# TODO post
 @app.route('/end_meeting', methods=['GET'])
 def end_meeting():
     meeting_id = request.args.get('meeting_id')
@@ -126,25 +127,19 @@ def end_meeting():
             f'Meeting: {meeting_id} does not exsist!'
         )
 
-#TODO
+
+# TODO
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
     result_dic = {}
     past_meetings = Meeting.get_past_meetings()
 
     for meeting in past_meetings:
-        emotions_dict = {}
-        get_attr = operator.attrgetter('time_stamp')
-        time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
-
-        for time_list in time_stamp_list:
-            student_no = [0]*5  # stores the number of students in each class at current time
-
-            for emotion in time_list:
-                student_no[int(emotion.value)] += 1
-            emotions_dict[str(time_list[0].time_stamp)] = student_no
-
-        result_dic[meeting.meeting_id] = emotions_dict
+        meeting_dict = {'analysis': meeting.get_meeting_analysis(),
+                        'id': meeting.meeting_id,
+                        'start_time': meeting.start_time
+                        }
+        result_dic[meeting.meeting_id] = meeting_dict
 
     return result_dic
 
@@ -161,7 +156,7 @@ def analyse_meeting():
     return make_response('Invalid Meeting ID')
 
 
-#TODO create user if user no
+# TODO create user if user no
 @app.route('/join_meeting', methods=['POST'])
 def join_meeting():
     meeting_id = request.form.get('meeting_id')
