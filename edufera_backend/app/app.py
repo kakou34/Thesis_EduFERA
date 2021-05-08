@@ -131,22 +131,29 @@ def end_meeting():
 def past_meetings():
     result_dic = {}
     past_meetings = Meeting.get_past_meetings()
-
     for meeting in past_meetings:
         emotions_dict = {}
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
-
         for time_list in time_stamp_list:
             student_no = [0]*5  # stores the number of students in each class at current time
-
             for emotion in time_list:
                 student_no[int(emotion.value)] += 1
             emotions_dict[str(time_list[0].time_stamp)] = student_no
-
         result_dic[meeting.meeting_id] = emotions_dict
-
     return result_dic
+
+
+@app.route('/meeting_analysis', methods=['GET'])
+def analyse_meeting():
+    meeting_id = request.args.get('meeting_id')
+    if meeting_id:
+        meeting = Meeting.get_meeting(meeting_id)
+        if meeting:
+            emotions = meeting.get_meeting_analysis()
+            return jsonify(emotions)
+
+    return make_response('Invalid Meeting ID')
 
 
 @app.route('/join_meeting', methods=['GET'])
@@ -193,11 +200,6 @@ def attendances():
         make_response(
             'Attendances not found!'
         )
-
-
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello'})
 
 
 if __name__ == '__main__':

@@ -1,3 +1,5 @@
+import itertools
+import operator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -168,19 +170,36 @@ class Meeting(db.Model):
 
         return meeting
 
-    @classmethod
-    def end_meeting(cls, meeting_id, end_time=datetime.now()):
-        meeting = cls.query.filter_by(meeting_id=meeting_id).first()
-        meeting.end_time = end_time.replace(microsecond=0)
+    def end_meeting(self, end_time=datetime.now()):
+        self.end_time = end_time.replace(microsecond=0)
         db.session.commit()
-
-        return meeting
 
     @classmethod
     def get_past_meetings(cls):
         current_time = datetime.now().replace(microsecond=0)
         meetings = cls.query.filter(cls.end_time < current_time).all()
         return meetings
+
+    # @classmethod
+    def get_meeting_analysis(self):
+        # meeting = cls.query.filter_by(meeting_id=meeting_id).first()
+        emotions_list = [{"id": "Active Pleasant",     "data": []},
+                         {"id": "Active Unpleasant",   "data": []},
+                         {"id": "Inactive Unpleasant", "data": []},
+                         {"id": "Inactive Pleasant",   "data": []},
+                         {"id": "No Face",             "data": []}]
+        # if meeting:
+        get_attr = operator.attrgetter('time_stamp')
+        time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(self.emotions, key=get_attr), get_attr)]
+
+        for time_list in time_stamp_list:
+            student_no = [0] * 5  # stores the number of students in each class at current time
+            for emotion in time_list:
+                student_no[int(emotion.value)] += 1
+            for i in range(5):
+                data = emotions_list[i]['data']
+                data.append({'time_stamp': str(time_list[0].time_stamp), 'student_no': student_no[i]})
+        return emotions_list
 
 
 def first(iterable, default=None):
