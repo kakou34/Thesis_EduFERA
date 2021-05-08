@@ -130,7 +130,7 @@ def end_meeting():
 
 @app.route('/past_meetings', methods=['GET'])
 def past_meetings():
-    result_dic = {}
+    result = []
     past_meetings = Meeting.get_past_meetings()
 
     for meeting in past_meetings:
@@ -138,9 +138,9 @@ def past_meetings():
                         'id': meeting.meeting_id,
                         'start_time': meeting.start_time
                         }
-        result_dic[meeting.meeting_id] = meeting_dict
+        result.append(meeting_dict)
 
-    return result_dic
+    return jsonify(result)
 
 
 @app.route('/meeting_analysis', methods=['GET'])
