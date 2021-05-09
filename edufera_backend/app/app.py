@@ -66,9 +66,9 @@ def stream_predict():
 
 
 # TODO post
-@app.route('/start_meeting', methods=['GET'])
+@app.route('/start_meeting', methods=['POST'])
 def start_meeting():
-    meeting_id = request.args.get('meeting_id')
+    meeting_id = request.form.get('meeting_id')
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
@@ -197,6 +197,58 @@ def user_by_meeting():
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(meeting.emotions, key=get_attr), get_attr)]
         result_dic[meeting.meeting_id] = time_stamp_list
+
+    return result_dic
+
+
+# i get meeting id -> i goto emotions table , get with the metting id given -> group'em by the user -> [ {user id: 'sfds', 'user_name' : 'username' emotions : [ {time : "sdf", emotion":'s'}]]
+@app.route('/emotions_by_meeting', methods=['GET'])
+def emotions_by_meeting():
+    dataToSend = {
+        "id": request.args.get('meeting_id'),
+        "emotions": [{
+            "id": "0",
+            "data": []},
+            {
+                "id": "1",
+                "data": []
+            },
+            {
+                "id": "2",
+                "data": []
+            },
+            {
+                "id": "3",
+                "data": []
+            },
+            {
+                "id": "4",
+                "data": []
+            }
+        ]
+    }
+    meeting_id = request.args.get('meeting_id')
+    the_meeting = Meeting.get_meeting(meeting_id)
+    if the_meeting:
+        the_emotions = Emotion.query.filter_by(meeting_id=the_meeting.id)
+
+        if the_emotions:
+            for emotion in the_emotions:
+                val = emotion.value
+                userId = emotion.user_id;
+                timeStamp = emotion.time_stamp;
+                emotionData = {
+                    "time_stamp": str(timeStamp),
+                    "student_no": str(userId)
+                }
+                dataToSend['emotions'][int(val)]['data'].append(emotionData)
+
+            return jsonify(dataToSend)
+
+        return f'Emotions does not exsist!'
+    return f'Metting with id {meeting_id} does not exsist!'
+
+    result_dic = []
 
     return result_dic
 
