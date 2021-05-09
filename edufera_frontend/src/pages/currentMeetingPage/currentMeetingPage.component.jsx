@@ -41,9 +41,7 @@ const CurrentMeetingPage = (props) => {
             <div className='meetingContainer'>
 
                 <div className='diagramCurrent-container'>
-                    <div className='diagramCurrent'>
-                        {emotions.map(emotion => <div> time={emotion.time_stamp}, emotion={emotion.value}</div>)}
-                    </div>
+
                 </div>
                 <div className='txt-container'>
                     <p className='txt'>{status}</p>

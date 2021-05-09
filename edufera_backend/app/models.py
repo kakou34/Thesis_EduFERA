@@ -198,7 +198,7 @@ class Meeting(db.Model):
                 student_no[int(emotion.value)] += 1
             for i in range(5):
                 data = emotions_list[i]['data']
-                data.append({'time_stamp': str(time_list[0].time_stamp), 'student_no': student_no[i]})
+                data.append({'x': str(time_list[0].time_stamp), 'y': student_no[i]})
         return emotions_list
 
 
