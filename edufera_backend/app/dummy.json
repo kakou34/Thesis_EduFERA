@@ -303,25 +303,38 @@
   }
 ]
 ,
+[
+        "user_id1" :[],
+        "user_id2" :[],
+        "user_id3" :[],
+]
+
 
 [
-{"user_id": 'sfds',
-"emotions": [
-{
-"time": "sdf",
-"emotion": "s"
-},
-{"time": "sdf",
-"emotion": "s"}
-]},
-{
-"user id": 'sfds',
-"emotions": [
-{
-"time": "sdf",
-"emotion": "s"
-},
-{"time": "sdf",
-"emotion": "s"}
-]},
+  {
+    "user_id": 'sfds',
+    "emotions": [
+      {
+        "time": "sdf",
+        "emotion": "s"
+      },
+      {
+        "time": "sdf",
+        "emotion": "s"
+      }
+    ]
+  },
+  {
+    "user id": 'sfds',
+    "emotions": [
+      {
+        "time": "sdf",
+        "emotion": "s"
+      },
+      {
+        "time": "sdf",
+        "emotion": "s"
+      }
+    ]
+  }
 ]

@@ -295,6 +295,33 @@ def emotions_for_all_meetings():
     return f'No Finished Meeting Exists!'
 
 
+@app.route('/emotion_for_users_by_meeting', methods=['GET'])
+def emotion_for_users_by_meeting():
+    data_to_send = []
+    meeting_id = request.args.get('meeting_id')
+    the_meeting = Meeting.get_meeting(meeting_id)
+    if the_meeting:
+        the_emotions = Emotion.query.filter_by(meeting_id=the_meeting.id)
+        list_of_users = db.session.query(Emotion.user_id).filter_by(meeting_id=the_meeting.id).distinct()
+        user_list = {}
+        for user in list_of_users:
+            user_list[str(user.user_id)] = []
+            data_to_send.append({
+                "user_id": str(user.user_id),
+                "emotions": user_list[str(user.user_id)]
+            })
+        if the_emotions:
+            for emotion in the_emotions:
+                em = {
+                    "time": str(emotion.time_stamp),
+                    "emotion": str(emotion.value)
+                }
+                user_list[str(emotion.user_id)].append(em)
+            return jsonify(data_to_send)
+        return f'Emotions for meeting with id {meeting_id} Not found'
+    return f'Meeting with id {meeting_id} Not found'
+
+
 @app.route('/attendances', methods=['GET'])
 def attendances():
     meeting_id = request.args.get('meeting_id')
