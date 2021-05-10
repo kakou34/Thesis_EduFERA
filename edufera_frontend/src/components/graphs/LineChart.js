@@ -5,20 +5,10 @@ import {Line} from "react-chartjs-2";
 
 const LineChart = (props) => {
 
-    const [labels, setLabels] = useState([]);
-    const [data, setData] = useState([]);
-
-    useEffect( () => {
-        console.log('props updated');
-        console.log(props)
-        setLabels(props.labels);
-        setData(props.data);
-    }, [props])
-
     return (
         <Line
             data={{
-                labels: labels,
+                labels: props.labels,
                 datasets: [
                     {
                         type: "line",
@@ -28,7 +18,7 @@ const LineChart = (props) => {
                         backgroundColor: 'rgba(75,192,192,1)',
                         borderColor: 'rgba(0,0,0,1)',
                         borderWidth: 0.5,
-                        data: data[0]
+                        data: props.data[0]
                     }, {
                         type: "line",
                         label: "Active Unpleasant",
@@ -37,7 +27,7 @@ const LineChart = (props) => {
                         backgroundColor: 'rgba(90,20,20,1)',
                         borderColor: 'rgba(0,0,0,1)',
                         borderWidth: 0.5,
-                        data: data[1]
+                        data: props.data[1]
                     }, {
                         type: "line",
                         label: "Inactive Unpleasant",
@@ -46,7 +36,7 @@ const LineChart = (props) => {
                         backgroundColor: 'rgba(0,10,80,1)',
                         borderColor: 'rgba(0,0,0,1)',
                         borderWidth: 0.5,
-                        data: data[2]
+                        data: props.data[2]
                     }, {
                         type: "line",
                         label: "Inactive Pleasant",
@@ -55,7 +45,7 @@ const LineChart = (props) => {
                         backgroundColor: 'rgba(0,150,0,1)',
                         borderColor: 'rgba(0,0,0,1)',
                         borderWidth: 0.5,
-                        data: data[3]
+                        data: props.data[3]
                     }, {
                         type: "line",
                         label: "No Face",
@@ -64,7 +54,7 @@ const LineChart = (props) => {
                         backgroundColor: 'rgba(128,128,128,1)',
                         borderColor: 'rgba(0,0,0,1)',
                         borderWidth: 0.5,
-                        data: data[4]
+                        data: props.data[4]
                     }
                 ]
             }}
