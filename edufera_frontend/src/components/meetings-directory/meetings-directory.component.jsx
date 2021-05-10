@@ -3,16 +3,18 @@ import './meetings-directory.styles.scss';
 
 import SearchBox from '../search-box/search-box.component';
 import MeetingsListItems from '../meetings-list-items/meetings-list-items.compopnent';
-import {data} from '../../data/dummydata'
 
 class MeetingsDirectory extends React.Component {
-
-    constructor() {
+state = {
+    searchField: '',
+    // You can even call functions and class methods:
+    meetings: this.props.meetings,
+  }
+   /* constructor() {
         super();
-
         this.state = {
             searchField: '',
-            meetingsDates: [{
+            meetings: [{
                 title:  'Meeting ID1',
                 id: 1
 
@@ -34,14 +36,16 @@ class MeetingsDirectory extends React.Component {
             }, 
          ]
         };
-    }
+    }*/
 
 
 
     render() {
-        const {meetingsDates,searchField } = this.state;
-        const filteredDates = meetingsDates.filter(meetingDate =>
-            meetingDate.title.toLowerCase().includes(searchField.toLowerCase()))
+        console.log('here come props')
+        console.log(this.state)
+        const {meetings,searchField } = this.state;
+        const filteredMeetings = meetings.filter(meeting =>
+            meeting.start_time.toLowerCase().includes(searchField.toLowerCase()))
 
         return (
             <div className='directory-items'>
@@ -50,8 +54,8 @@ class MeetingsDirectory extends React.Component {
              handleChange = {e => this.setState({searchField: e.target.value})} 
              />
              <div className='container'>
-             {filteredDates.map(({title, id}) => (
-                <MeetingsListItems className='listItem' key={id} title = {title}/>
+             {filteredMeetings.map(({start_time, id}) => (
+                <MeetingsListItems className='listItem' key={id} title = {id}/>
             )   
             )}
              </div>
