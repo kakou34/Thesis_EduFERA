@@ -230,6 +230,7 @@ def emotions_by_meeting():
     meeting_id = request.args.get('meeting_id')
     the_meeting = Meeting.get_meeting(meeting_id)
     if the_meeting:
+        dataToSend["start_time"] = the_meeting.start_time
         the_emotions = Emotion.query.filter_by(meeting_id=the_meeting.id)
 
         if the_emotions:
@@ -248,9 +249,50 @@ def emotions_by_meeting():
         return f'Emotions does not exsist!'
     return f'Metting with id {meeting_id} does not exsist!'
 
-    result_dic = []
 
-    return result_dic
+@app.route('/emotions_for_all_meetings', methods=['GET'])
+def emotions_for_all_meetings():
+    dataToSend = []
+    all_past_meetings = Meeting.get_past_meetings();
+    if all_past_meetings:
+        for a_past_meeting in all_past_meetings:
+            data_of_meeting = {
+                "id": a_past_meeting.meeting_id,
+                "start_time": a_past_meeting.start_time,
+                "emotions": [{
+                    "id": "0",
+                    "data": []},
+                    {
+                        "id": "1",
+                        "data": []
+                    },
+                    {
+                        "id": "2",
+                        "data": []
+                    },
+                    {
+                        "id": "3",
+                        "data": []
+                    },
+                    {
+                        "id": "4",
+                        "data": []
+                    }
+                ]
+            }
+            the_emotions = Emotion.query.filter_by(meeting_id=a_past_meeting.id)
+            for emotion in the_emotions:
+                val = emotion.value
+                userId = emotion.user_id;
+                timeStamp = emotion.time_stamp;
+                emotionData = {
+                    "time_stamp": str(timeStamp),
+                    "student_no": str(userId)
+                }
+                data_of_meeting['emotions'][int(val)]['data'].append(emotionData)
+            dataToSend.append(data_of_meeting)
+            return jsonify(dataToSend)
+    return f'No Finished Meeting Exists!'
 
 
 @app.route('/attendances', methods=['GET'])
