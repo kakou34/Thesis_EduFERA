@@ -97,6 +97,11 @@ class Emotion(db.Model):
         db.session.commit()
         return emotion
 
+    @classmethod
+    def bulk_save_emotions(cls, emotions):
+        db.session.add_all(emotions)
+        db.session.commit()
+
 
 @dataclass
 class User(db.Model):

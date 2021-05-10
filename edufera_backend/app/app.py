@@ -67,6 +67,46 @@ def stream_predict():
         )
 
 
+@app.route('/predict', methods=['POST'])
+def predict():
+    meeting_id = request.form.get('meeting_id')
+    time_stamp = request.form.get('time_stamp')
+    if not time_stamp:
+        time_stamp = dt.now().replace(microsecond=0)
+    else:
+        time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
+    frames = request.files.getlist("frame")
+    user_ids = request.form.getlist('user_id')
+
+    if len(frames) != len(user_ids):
+        return make_response('The number of Users and Images must be the same')
+
+    meeting = Meeting.get_meeting(meeting_id)
+    if not meeting:
+        return make_response(f'Meeting with id {meeting_id} does not exist!')
+
+    results = [0]*5
+    emotions = []
+    messages = []
+
+    for i in range(len(frames)):
+        user = User.get_user(user_ids[i])
+        if not user:
+            messages.append(f'User with id {user_ids[i]} does not exist!')
+        else:
+            img_bytes = frames[i].read()
+            emotion = streamer.predict([img_bytes])[0]
+            emotions.append(Emotion(meeting_id=meeting.id, user_id= user.id, value=emotion, time_stamp=time_stamp))
+            results[emotion] += 1
+    socketio.emit('emotion_predicted',
+                  {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'results': results},
+                  to=meeting_id)
+    Emotion.bulk_save_emotions(emotions)
+
+    return {'results': results, 'messages': messages}
+
+
+
 # TODO post
 @app.route('/start_meeting', methods=['GET'])
 def start_meeting():
