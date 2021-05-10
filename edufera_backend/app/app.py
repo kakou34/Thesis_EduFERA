@@ -52,11 +52,13 @@ def stream_predict():
     meeting = Meeting.get_meeting(meeting_id)
     if not time_stamp:
         time_stamp = dt.now()
+    else:
+        time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
     if user and meeting and frame:
         img_bytes = frame.read()
         emotion = streamer.predict([img_bytes])[0]
         time_stamp = time_stamp.replace(microsecond=0)
-        socketio.emit('emotion_predicted', {'time_stamp': str(time_stamp), 'value': emotion}, to=meeting_id)
+        socketio.emit('emotion_predicted', {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'value': emotion}, to=meeting_id)
         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
         return {'emotion': emotion}
     else:
