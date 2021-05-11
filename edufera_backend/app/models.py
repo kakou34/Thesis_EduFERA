@@ -187,7 +187,7 @@ class Meeting(db.Model):
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(self.emotions, key=get_attr), get_attr)]
 
         for time_list in time_stamp_list:
-            time_stamps.append(str(time_list[0].time_stamp))
+            time_stamps.append(datetime.strftime(time_list[0].time_stamp, "%H:%M:%S"))
             student_no = [0] * 5  # stores the number of students in each class at current time
             for emotion in time_list:
                 student_no[int(emotion.value)] += 1

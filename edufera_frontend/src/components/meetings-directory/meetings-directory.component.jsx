@@ -70,8 +70,8 @@ class MeetingsDirectory extends React.Component {
                     handleChange={e => this.setState({searchField: e.target.value})}
                 />
                 <div className='container'>
-                    {filteredMeetings.map(({start_time, id}) => (
-                            <MeetingsListItems className='listItem' key={id} title={id}/>
+                    {filteredMeetings.map(({start_time, id, labels, data}) => (
+                            <MeetingsListItems className='listItem' key={id} title={id} labels={labels} data={data}/>
                         )
                     )}
                 </div>
