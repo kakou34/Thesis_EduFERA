@@ -3,11 +3,11 @@ import torch
 from facenet_pytorch import MTCNN
 from torchvision import transforms
 from PIL import Image
-from resnet50_ferplus_dag import resnet50_ferplus_dag
+from vgg_m_face_bn_fer_dag import vgg_m_face_bn_fer_dag
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = resnet50_ferplus_dag()
+model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg_wts.pth')
 model.to(device)
 model.eval()
 

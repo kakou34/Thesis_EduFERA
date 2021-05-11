@@ -52,17 +52,18 @@ def stream_predict():
     meeting = Meeting.get_meeting(meeting_id)
     if not time_stamp:
         time_stamp = dt.now()
-    if user and meeting and frame:
-        img_bytes = frame.read()
-        emotion = streamer.predict([img_bytes])[0]
-        time_stamp = time_stamp.replace(microsecond=0)
-        socketio.emit('emotion_predicted', {'time_stamp': str(time_stamp), 'value': emotion}, to=meeting_id)
-        Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
-        return {'emotion': emotion}
-    else:
-        return make_response(
-            'An error happened! Please make sure to provide the correct parameters.'
-        )
+    if not user:
+        return make_response('User not found')
+    if not meeting:
+        return make_response('Meeting not found')
+    if not frame:
+        return make_response('Frame not found')
+    img_bytes = frame.read()
+    emotion = streamer.predict([img_bytes])[0]
+    time_stamp = time_stamp.replace(microsecond=0)
+    socketio.emit('emotion_predicted', {'time_stamp': str(time_stamp), 'value': emotion}, to=meeting_id)
+    Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
+    return {'emotion': emotion}
 
 
 # TODO post
