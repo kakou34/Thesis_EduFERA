@@ -134,7 +134,9 @@ def past_meetings():
     past_meetings = Meeting.get_past_meetings()
 
     for meeting in past_meetings:
-        meeting_dict = {'analysis': meeting.get_meeting_analysis(),
+        labels, data = meeting.get_meeting_analysis()
+        meeting_dict = {'data': data,
+                        'labels': labels,
                         'id': meeting.meeting_id,
                         'start_time': meeting.start_time
                         }
