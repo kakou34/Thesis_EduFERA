@@ -41,30 +41,30 @@ def on_leave(data):
     print('A user has left room ' + room)
     send('You have left the room.', to=room)
 
-
-@app.route('/stream_predict', methods=['POST'])
-def stream_predict():
-    frame = request.files['frame']
-    meeting_id = request.form.get('meeting_id')
-    user_id = request.form.get('user_id')
-    time_stamp = request.form.get('time_stamp')
-    user = User.get_user(user_id)
-    meeting = Meeting.get_meeting(meeting_id)
-    if not time_stamp:
-        time_stamp = dt.now()
-    else:
-        time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
-    if user and meeting and frame:
-        img_bytes = frame.read()
-        emotion = streamer.predict([img_bytes])[0]
-        time_stamp = time_stamp.replace(microsecond=0)
-        socketio.emit('emotion_predicted', {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'value': emotion}, to=meeting_id)
-        Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
-        return {'emotion': emotion}
-    else:
-        return make_response(
-            'An error happened! Please make sure to provide the correct parameters.'
-        )
+# Todo:: remove this route
+# @app.route('/stream_predict', methods=['POST'])
+# def stream_predict():
+#     frame = request.files['frame']
+#     meeting_id = request.form.get('meeting_id')
+#     user_id = request.form.get('user_id')
+#     time_stamp = request.form.get('time_stamp')
+#     user = User.get_user(user_id)
+#     meeting = Meeting.get_meeting(meeting_id)
+#     if not time_stamp:
+#         time_stamp = dt.now()
+#     else:
+#         time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
+#     if user and meeting and frame:
+#         img_bytes = frame.read()
+#         emotion = streamer.predict([img_bytes])[0]
+#         time_stamp = time_stamp.replace(microsecond=0)
+#         socketio.emit('emotion_predicted', {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'value': emotion}, to=meeting_id)
+#         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
+#         return {'emotion': emotion}
+#     else:
+#         return make_response(
+#             'An error happened! Please make sure to provide the correct parameters.'
+#         )
 
 
 @app.route('/predict', methods=['POST'])
