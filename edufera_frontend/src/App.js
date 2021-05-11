@@ -1,13 +1,13 @@
-import './App.css';
-import React from 'react';
-import {Switch, Route} from 'react-router-dom';
+import './App.css'
+import React from 'react'
+import {Switch, Route} from 'react-router-dom'
 
 import PastMeetingsPage from './pages/PastMeetingsPage/pastMeetingsPage.component'
-import Header from './components/header/header.component';
-import UsersPage from './pages/UsersPage/usersPage.component'
-import CurrentMeetingPage from  "./pages/CurrentMeetingPage/currentMeetingPage.component"
-import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
-import UserList from "./websocket";
+import Header from './components/header/header.component'
+import UsersPage from "./pages/usersPage/usersPage.component"
+import CurrentMeetingPage from "./pages/currentMeetingPage/currentMeetingPage.component"
+import StartMeetingPage from './pages/StartMeetingPage/startMeetingPage.component'
+import UserList from './websocket'
 import io from 'socket.io-client'
 
 export const socket = io.connect('http://localhost:5000/', {transports: ['websocket'], upgrade: false})

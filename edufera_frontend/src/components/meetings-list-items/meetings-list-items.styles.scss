@@ -23,7 +23,7 @@
     height: 600px;
     display: flex ;
     .diagram-container {
-      width: 50%;
+      width: 70%;
       height: 100%;
       
       display: flex;
@@ -31,15 +31,7 @@
       align-items: center;
       border-bottom: 3px solid #0CF7DA;
     }
-    .piechart-container {
-      width: 50%;
-      height: 100%;
-      
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-bottom: 3px solid #0CF7DA;
-    }
+
     .btnContainer {
       width: 30%;
       height: 100%;
