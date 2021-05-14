@@ -9,7 +9,7 @@ const CurrentMeetingPage = (props) => {
     const roomId = props.match.params.meetingId // Gets roomId (meetingId) from URL
     const [status, setStatus] = useState('');
     const [time, setTime] = useState('');
-    const [data, setData] = useState([0, 0, 0, 0, 0]);
+    const [data, setData] = useState([5, 3, 5, 4, 0]);
 
     useEffect(() => {
         axios.get('http://localhost:5000/get_meeting_status', {params: {meeting_id: roomId}})
@@ -44,8 +44,8 @@ const CurrentMeetingPage = (props) => {
     return (
         <div className='current'>
             <div className='meetingContainer'>
-                <div className='diagramCurrent-container'>
-                    <PolarArea style={{height: 500, width: 500}}
+                <div className='diagramCurrent-cont'>
+                    <PolarArea
                                data={
                                    {
                                        labels: ['Active Pleasant',
@@ -64,7 +64,7 @@ const CurrentMeetingPage = (props) => {
                                                    'rgba(75, 192, 192, 0.8)',
                                                    'rgba(153, 102, 255, 0.6)',
                                                ],
-                                               borderWidth: 1,
+                                               borderWidth: 1.5,
                                            },
                                        ],
                                    }
@@ -72,7 +72,14 @@ const CurrentMeetingPage = (props) => {
                                options={{
                                    animation: {
                                        duration: 0
-                                   }
+                                   },
+                                 chart: {
+                    width: 200
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
+
                                }}
                     />
                 </div>
