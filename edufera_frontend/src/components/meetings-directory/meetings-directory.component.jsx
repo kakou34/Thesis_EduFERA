@@ -71,7 +71,7 @@ class MeetingsDirectory extends React.Component {
                 />
                 <div className='container'>
                     {filteredMeetings.map(({start_time, id, labels, data}) => (
-                            <MeetingsListItems className='listItem' key={id} title={id} labels={labels} data={data}/>
+                            <MeetingsListItems className='listItem' start_time={start_time} key={id} title={id} labels={labels} data={data}/>
                         )
                     )}
                 </div>

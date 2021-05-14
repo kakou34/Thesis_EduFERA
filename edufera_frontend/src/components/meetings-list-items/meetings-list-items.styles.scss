@@ -4,51 +4,60 @@
    flex-direction: row;
     flex-wrap: wrap;
     flex: 1 1 auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+   // display: flex;
+   // align-items: flex-start;
+   // justify-content: flex-start;
     border-bottom: 3px solid #0CF7DA;
     cursor: pointer;
-   
+
     .title {
         margin:  7.5px;
-        font-weight: bold; 
+        font-weight: bold;
         padding-left: 15px;
-        
+
+    }
+    .start_time {
+    display:flex;
+        margin:  7.5px;
+        font-weight: bold;
+        padding-left: 960px;
+        align-items: flex-end;
+        justify-content: flex-end;
+        color: gray
     }
   }
   .item-expand  {
-   
+
     width: 100%;
     height: 600px;
     display: flex ;
-    .diagram-container {
-      width: 70%;
+    flex-direction: column;
+
+    .diagram-cont {
+      width: 90%;
       height: 100%;
-      
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-bottom: 3px solid #0CF7DA;
+      margin-left: 30px;
     }
 
+
     .btnContainer {
-      width: 30%;
-      height: 100%;
-      
+      width: 100%;
+      height: 10%;
+      //background-color:green;
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
       border-bottom: 3px solid #0CF7DA;
 
       .btnListOfUsers {
         width: auto;
     //width: 170px;
-    height: 50px;
+    height: 40px;
     border-radius: 10px;
     letter-spacing: 0.5px;
-    line-height: 50px;
-    padding: 0 30px 0 30px;
+    line-height: 40px;
+    padding:0 30px 0 30px;
+    margin-right:15px;
     font-size: 18px;
     background-color: #12a191;
     color: white;

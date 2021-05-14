@@ -24,15 +24,22 @@ class MeetingsListItems extends React.Component {
         return (
             <React.Fragment>
                 <div className='list-item' onClick={this.toggle}>
+                <div className='title_container'>
                     <p className='title'>
-                        {this.props.title}
+                      Meeting ID:  {this.props.title}
                     </p>
+                </div>
+                <div className='start_time_container'>
+                    <p className='start_time'>
+                        {this.props.start_time}
+                    </p>
+                </div>
                 </div>
                 <Expand open={this.state.open}>
                     <div className='item-expand'>
-                        <div className='diagram-container'>
-                            <div className='diagram'>
-                                <Line style={{height: 500, width: 1000}}
+                        <div className='diagram-cont'>
+
+                                <Line
                                       data={{
                                           labels: this.props.labels,
                                           datasets: [
@@ -41,8 +48,8 @@ class MeetingsListItems extends React.Component {
                                                   label: "Active Pleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: 'rgba(75,192,192,1)',
-                                                  borderColor: 'rgb(75, 192, 192)',
+                                                  backgroundColor: '#25F70C',
+                                                  borderColor: '#25F70C',
                                                   borderWidth: 1,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[0],
@@ -52,9 +59,9 @@ class MeetingsListItems extends React.Component {
                                                   label: "Active Unpleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: 'rgba(90,20,20,1)',
-                                                  borderColor: 'rgba(90,20,20,1)',
-                                                  borderWidth: 1,
+                                                  backgroundColor: 'red',
+                                                  borderColor: 'red',
+                                                  borderWidth: 1.8,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[1]
                                               }, {
@@ -62,8 +69,8 @@ class MeetingsListItems extends React.Component {
                                                   label: "Inactive Unpleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: 'rgba(0,10,80,1)',
-                                                  borderColor: 'rgba(0,10,80,1)',
+                                                  backgroundColor: '#007EF5',
+                                                  borderColor: '#007EF5',
                                                   borderWidth: 1,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[2]
@@ -72,9 +79,9 @@ class MeetingsListItems extends React.Component {
                                                   label: "Inactive Pleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: 'rgba(0,150,0,1)',
-                                                  borderColor: 'rgba(0,150,0,1)',
-                                                  borderWidth: 1,
+                                                  backgroundColor: '#F59800',
+                                                  borderColor: '#F59800',
+                                                  borderWidth: 1.8,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[3]
                                               }, {
@@ -84,7 +91,7 @@ class MeetingsListItems extends React.Component {
                                                   lineTension: 0.5,
                                                   backgroundColor: 'rgba(128,128,128,1)',
                                                   borderColor: 'rgba(128,128,128,1)',
-                                                  borderWidth: 1,
+                                                  borderWidth: 1.5,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[4]
                                               }
@@ -101,13 +108,13 @@ class MeetingsListItems extends React.Component {
                                                   {
                                                       ticks: {
                                                           autoSkip: true,
-                                                          maxTicksLimit: 10
+                                                          maxTicksLimit:10
                                                       },
                                                   }
                                               ]
                                           }
                                       }}/>
-                            </div>
+
                         </div>
 
                         <div className='btnContainer'>
