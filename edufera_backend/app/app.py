@@ -1,14 +1,13 @@
-import itertools
-import operator
+import time
 
-from flask import jsonify, request, make_response
+from flask import jsonify, request, make_response, Response
 from flask_socketio import *
-from flask_cors import CORS, cross_origin
 from models import *
 from settings import *
 from datetime import datetime as dt
 from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
+from werkzeug.utils import secure_filename
 
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
@@ -40,6 +39,23 @@ def on_leave(data):
     leave_room(room)
     print('A user has left room ' + room)
     send('You have left the room.', to=room)
+
+
+@app.route('/offline_analysis', methods=['POST'])
+def offline_analysis():
+    video = request.files['video']
+    filename = secure_filename(video.filename)
+    if not allowed_file(filename):
+        return Response({'The file should have one of the following formats: mp4, ogg, webm.'}, status=201)
+    else:
+        time.sleep(5)
+        data = [['00:00', '00:01', '00:02', '00:03', '00:04', '00:05', '00:06', '00:07', '00:08', '00:09', '00:10'],
+                [[0, 5, 6, 6, 6, 5, 4, 3, 4, 4, 3],
+                 [0, 1, 1, 0, 1, 2, 2, 1, 0, 0, 0],
+                 [0, 3, 2, 3, 3, 5, 4, 5, 3, 1, 1],
+                 [0, 5, 6, 7, 6, 6, 5, 6, 7, 8, 5],
+                 [0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0]]]
+        return jsonify(data)
 
 
 @app.route('/stream_predict', methods=['POST'])
@@ -135,7 +151,9 @@ def past_meetings():
     past_meetings = Meeting.get_past_meetings()
 
     for meeting in past_meetings:
-        meeting_dict = {'analysis': meeting.get_meeting_analysis(),
+        labels, data = meeting.get_meeting_analysis()
+        meeting_dict = {'data': data,
+                        'labels': labels,
                         'id': meeting.meeting_id,
                         'start_time': meeting.start_time
                         }
@@ -217,6 +235,11 @@ def attendances():
 @app.route('/test')
 def test():
     return jsonify({'message': 'Hello'})
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg"]
 
 
 # ===================

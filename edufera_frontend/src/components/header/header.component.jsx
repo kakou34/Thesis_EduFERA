@@ -15,6 +15,7 @@ const Header = () => (
      <div className='options'>
       <Link className='option' to ='/startAnalysis' >Current Meeting</Link>
       <Link className='option' to ='/' >Past Meetings</Link>
+      <Link className='option' to ='/offlineAnalysis' >Recorded Meeting</Link>
 
      </div>
 
