@@ -718,6 +718,7 @@ class Resnet50_ferplus_dag(nn.Module):
         prediction = self.classifier(pool5_7x7_s1)
         self.debug_feats['prediction'] = prediction.clone()
 
+
 def resnet50_ferplus_dag(weights_path=None, **kwargs):
     """
     load imported model instance
