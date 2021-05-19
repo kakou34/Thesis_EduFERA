@@ -4,8 +4,8 @@ import {Switch, Route} from 'react-router-dom';
 
 import PastMeetingsPage from './pages/PastMeetingsPage/pastMeetingsPage.component'
 import Header from './components/header/header.component';
-import CurrentMeetingPage from "./pages/CurrentMeetingPage/currentMeetingPage.component";
-import UsersPage from "./pages/UsersPage/usersPage.component";
+import CurrentMeetingPage from "./pages/currentMeetingPage/currentMeetingPage.component";
+import UsersPage from "./pages/usersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
 import UserList from "./websocket";
 import io from 'socket.io-client'
@@ -15,16 +15,7 @@ export const socket = io.connect('http://localhost:5000/', {transports: ['websoc
 class App extends React.Component {
     constructor() {
         super();
-
-        //Just example state before I get the real data
-
     }
-
-    //Empty for now to fetch data
-    componentDidMount() {
-
-    }
-
 
     render() {
         return (
