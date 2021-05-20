@@ -4,7 +4,7 @@ from facenet_pytorch import MTCNN
 from torchvision import transforms
 from PIL import Image
 from vgg_m_face_bn_fer_dag import vgg_m_face_bn_fer_dag
-
+import cv2
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg_wts.pth')
@@ -64,6 +64,43 @@ def batch_prediction(image_bytes_batch):
                 results[j] = predicted_ids[0]
                 del predicted_ids[0]
 
+    return results
+
+
+# RIDWAN'S CODE
+def video_prediction(video):
+    v_cap = cv2.VideoCapture(video.filename)
+    v_len = int(v_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # Loop through video, taking a handful of frames to form a batch
+    frames = []
+    for i in range(v_len):
+
+        # Load frame
+        success = v_cap.grab()
+        if i % 150 == 0:
+            success, frame = v_cap.retrieve()
+        else:
+            continue
+        if not success:
+            continue
+
+        # Add to batch
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frames.append(Image.fromarray(frame))
+
+    # Detect faces in batch
+    faces = face_detector(frames)
+
+    results = {}
+    for i, frame_faces in enumerate(faces):
+        if len(frame_faces) != 0:
+            frame_faces = [transform_image(face) for face in frame_faces]
+
+            inputs = torch.cat(frame_faces).to(device)
+            outputs = model.forward(inputs)
+            _, y_hat = outputs.max(1)
+            results[i] = [y_hat.tolist().count(0), y_hat.tolist().count(1), y_hat.tolist().count(2),
+                          y_hat.tolist().count(3)]
     return results
 
 

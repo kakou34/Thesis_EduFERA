@@ -5,7 +5,7 @@ from flask_socketio import *
 from models import *
 from settings import *
 from datetime import datetime as dt
-from ml_model import batch_prediction
+from ml_model import batch_prediction, video_prediction
 from service_streamer import ThreadedStreamer
 from werkzeug.utils import secure_filename
 
@@ -48,14 +48,8 @@ def offline_analysis():
     if not allowed_file(filename):
         return Response({'The file should have one of the following formats: mp4, ogg, webm.'}, status=201)
     else:
-        time.sleep(5)
-        data = [['00:00', '00:01', '00:02', '00:03', '00:04', '00:05', '00:06', '00:07', '00:08', '00:09', '00:10'],
-                [[0, 5, 6, 6, 6, 5, 4, 3, 4, 4, 3],
-                 [0, 1, 1, 0, 1, 2, 2, 1, 0, 0, 0],
-                 [0, 3, 2, 3, 3, 5, 4, 5, 3, 1, 1],
-                 [0, 5, 6, 7, 6, 6, 5, 6, 7, 8, 5],
-                 [0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0]]]
-        return jsonify(data)
+        predicted_result = video_prediction(video)
+        return jsonify(predicted_result)
 
 
 @app.route('/stream_predict', methods=['POST'])
@@ -83,9 +77,9 @@ def stream_predict():
 
 
 # TODO post
-@app.route('/start_meeting', methods=['GET'])
+@app.route('/start_meeting', methods=['POST'])
 def start_meeting():
-    meeting_id = request.args.get('meeting_id')
+    meeting_id = request.form.get('meeting_id')
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
@@ -129,9 +123,9 @@ def get_meeting_status():
 
 
 # TODO post
-@app.route('/end_meeting', methods=['GET'])
+@app.route('/end_meeting', methods=['POST'])
 def end_meeting():
-    meeting_id = request.args.get('meeting_id')
+    meeting_id = request.form.get('meeting_id')
     if meeting_id:
         the_meeting = Meeting.get_meeting(meeting_id)
         if the_meeting:
