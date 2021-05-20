@@ -203,6 +203,5 @@ def first(iterable, default=None):
     return default
 
 
-#i get meeting id -> i goto emotions table , get with the metting id given -> group'em by the user -> [ {user id: 'sfds', 'user_name' : 'username' emotions : [ {time : "sdf", emotion":'s'}]]
 
 
