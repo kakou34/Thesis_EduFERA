@@ -5,6 +5,7 @@ from torchvision import transforms
 from PIL import Image
 from vgg_m_face_bn_fer_dag import vgg_m_face_bn_fer_dag
 import cv2
+import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg_wts.pth')
@@ -90,8 +91,8 @@ def video_prediction(video):
 
     # Detect faces in batch
     faces = face_detector(frames)
-
-    results = {}
+    data = [["0", "1", "2", "3", "4"]]
+    results = []
     for i, frame_faces in enumerate(faces):
         if len(frame_faces) != 0:
             frame_faces = [transform_image(face) for face in frame_faces]
@@ -99,8 +100,8 @@ def video_prediction(video):
             inputs = torch.cat(frame_faces).to(device)
             outputs = model.forward(inputs)
             _, y_hat = outputs.max(1)
-            results[i] = [y_hat.tolist().count(0), y_hat.tolist().count(1), y_hat.tolist().count(2),
-                          y_hat.tolist().count(3)]
+            results.append([y_hat.tolist().count(0), y_hat.tolist().count(1), y_hat.tolist().count(2), y_hat.tolist().count(3)])
+    data.append(np.array(results).T.tolist())
     return results
 
 
