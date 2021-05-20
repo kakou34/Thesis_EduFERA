@@ -21,44 +21,9 @@ class MeetingsDirectory extends React.Component {
             })
 
     }
-    // state = {
-    //     searchField: '',
-    //     // You can even call functions and class methods:
-    //     meetings: this.props.meetings,
-    // }
-
-    /* constructor() {
-         super();
-         this.state = {
-             searchField: '',
-             meetings: [{
-                 title:  'Meeting ID1',
-                 id: 1
-
-             },
-             {
-                 title:  'Meeting ID2',
-                 id: 2
-
-             },
-             {
-                 title:  'Meeting ID3',
-                 id: 3
-
-             },
-             {
-                 title:  'Meeting ID4',
-                 id: 4
-
-             },
-          ]
-         };
-     }*/
 
 
     render() {
-        console.log('here come  state')
-        console.log(this.state)
         const {meetings, searchField} = this.state;
         const filteredMeetings = meetings.filter(meeting =>
             meeting.id.toLowerCase().includes(searchField.toLowerCase()))

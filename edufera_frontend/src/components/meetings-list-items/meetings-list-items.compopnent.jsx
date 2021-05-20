@@ -120,7 +120,7 @@ class MeetingsListItems extends React.Component {
                         <div className='btnContainer'>
                             <div className='btnListOfUsers'>
                                 <Link className='usersLink' style={{textDecoration: 'none', color: 'white'}}
-                                      to="/usersPage">Details</Link>
+                                      to={'/usersPage/' + this.props.title}>Details</Link>
                             </div>
                         </div>
                     </div>

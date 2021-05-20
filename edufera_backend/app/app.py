@@ -13,6 +13,12 @@ socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
 
+class_names = ['Positively-Active',
+               'Negatively-Active',
+               'Negatively-Passive',
+               'Positively-Passive',
+               'No Face']
+
 
 # SocketIO Events
 @socketio.on('connect')
@@ -220,123 +226,27 @@ def user_by_meeting():
     return result_dic
 
 
-# i get meeting id -> i goto emotions table , get with the metting id given -> group'em by the user -> [ {user id: 'sfds', 'user_name' : 'username' emotions : [ {time : "sdf", emotion":'s'}]]
-@app.route('/emotions_by_meeting', methods=['GET'])
-def emotions_by_meeting():
-    dataToSend = {
-        "id": request.args.get('meeting_id'),
-        "emotions": [{
-            "id": "0",
-            "data": []},
-            {
-                "id": "1",
-                "data": []
-            },
-            {
-                "id": "2",
-                "data": []
-            },
-            {
-                "id": "3",
-                "data": []
-            },
-            {
-                "id": "4",
-                "data": []
-            }
-        ]
-    }
+@app.route('/get_meeting_details', methods=['GET'])
+def get_meeting_details():
+    user_emotions = {}
     meeting_id = request.args.get('meeting_id')
-    the_meeting = Meeting.get_meeting(meeting_id)
-    if the_meeting:
-        dataToSend["start_time"] = the_meeting.start_time
-        the_emotions = Emotion.query.filter_by(meeting_id=the_meeting.id)
-
-        if the_emotions:
-            for emotion in the_emotions:
-                val = emotion.value
-                userId = emotion.user_id;
-                timeStamp = emotion.time_stamp;
-                emotionData = {
-                    "time_stamp": str(timeStamp),
-                    "student_no": str(userId)
-                }
-                dataToSend['emotions'][int(val)]['data'].append(emotionData)
-
-            return jsonify(dataToSend)
-
-        return f'Emotions does not exsist!'
-    return f'Metting with id {meeting_id} does not exsist!'
-
-
-@app.route('/emotions_for_all_meetings', methods=['GET'])
-def emotions_for_all_meetings():
-    dataToSend = []
-    all_past_meetings = Meeting.get_past_meetings();
-    if all_past_meetings:
-        for a_past_meeting in all_past_meetings:
-            data_of_meeting = {
-                "id": a_past_meeting.meeting_id,
-                "start_time": a_past_meeting.start_time,
-                "emotions": [{
-                    "id": "0",
-                    "data": []},
-                    {
-                        "id": "1",
-                        "data": []
-                    },
-                    {
-                        "id": "2",
-                        "data": []
-                    },
-                    {
-                        "id": "3",
-                        "data": []
-                    },
-                    {
-                        "id": "4",
-                        "data": []
-                    }
-                ]
-            }
-            the_emotions = Emotion.query.filter_by(meeting_id=a_past_meeting.id)
-            for emotion in the_emotions:
-                val = emotion.value
-                userId = emotion.user_id;
-                timeStamp = emotion.time_stamp;
-                emotionData = {
-                    "time_stamp": str(timeStamp),
-                    "student_no": str(userId)
-                }
-                data_of_meeting['emotions'][int(val)]['data'].append(emotionData)
-            dataToSend.append(data_of_meeting)
-            return jsonify(dataToSend)
-    return f'No Finished Meeting Exists!'
-
-
-@app.route('/emotion_for_users_by_meeting', methods=['GET'])
-def emotion_for_users_by_meeting():
-    data_to_send = []
-    meeting_id = request.args.get('meeting_id')
-    the_meeting = Meeting.get_meeting(meeting_id)
-    if the_meeting:
-        the_emotions = Emotion.query.filter_by(meeting_id=the_meeting.id)
-        list_of_users = db.session.query(Emotion.user_id).filter_by(meeting_id=the_meeting.id).distinct()
-        user_list = {}
+    meeting = Meeting.get_meeting(meeting_id)
+    if meeting:
+        emotions = meeting.emotions
+        list_of_users = [emotion.user for emotion in emotions]
         for user in list_of_users:
-            user_list[str(user.user_id)] = []
-            data_to_send.append({
+            user_emotions[int(user.id)] = {
                 "user_id": str(user.user_id),
-                "emotions": user_list[str(user.user_id)]
-            })
-        if the_emotions:
-            for emotion in the_emotions:
-                em = {
-                    "time": str(emotion.time_stamp),
-                    "emotion": str(emotion.value)
-                }
-                user_list[str(emotion.user_id)].append(em)
-            return jsonify(data_to_send)
+                "user_name": str(user.user_name),
+                "time_stamps": [],
+                "emotions": []
+            }
+        if emotions:
+            for emotion in emotions:
+                user_emotions[int(emotion.user_id)].get("time_stamps").append(emotion.time_stamp.strftime("%H:%M:%S"))
+                user_emotions[int(emotion.user_id)].get("emotions").append(class_names[int(emotion.value)])
+
+            return jsonify(list(user_emotions.values()))
         return f'Emotions for meeting with id {meeting_id} Not found'
     return f'Meeting with id {meeting_id} Not found'
 
@@ -353,18 +263,11 @@ def attendances():
         )
 
 
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello'})
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg"]
 
 
-# ===================
-# USER ROUTES
 @app.route('/create_user', methods=['POST'])
 def create_user():
     user_id = request.form.get('user_id')
@@ -388,7 +291,6 @@ def get_user():
         return f'user with id {user_id} does not exist!'
 
 
-# EMOTION ROUTES
 @app.route('/get_emotion', methods=['GET'])  # get emotion by user and meeting
 def get_emotion():
     user_id = request.args.get('user_id')
