@@ -1,65 +1,10 @@
-from edufera_backend.app.models import Meeting, User, Attendance, Emotion
+from models import Meeting, User, Attendance, Emotion
 from datetime import datetime as dt
 import pandas as pd
-from . import db
-
-
-def generate_data():
-    meeting = Meeting.start_meeting("204 255 15", dt.strptime('18/09/19 01:00:00', '%d/%m/%y %H:%M:%S'))
-    meeting = Meeting.end_meeting("204 255 15", dt.strptime('18/09/19 01:00:00', '%d/%m/%y %H:%M:%S'))
-
-    db.session.bulk_save_objects(
-        [
-            User(
-                user_id=f"{i+1}",
-                user_name=f"User{i+1}",
-            )
-            for i in range(25)
-        ],
-        return_defaults=True,
-    )
-    db.session.commit()
-
-
-def generate_attendances():
-    db.session.bulk_save_objects(
-        [
-            Attendance(
-                user_id=f"{i+1}",
-                meeting_id="204 255 15",
-                join_time= dt.strptime("Wed, 27 July 2016 13:30:00", '%a, %d %B %Y %H:%M:%S')
-            )
-            for i in range(18)
-        ],
-        return_defaults=True,
-    )
-    db.session.commit()
-
-    db.session.bulk_save_objects(
-        [
-            Attendance(
-                user_id=f"{i}",
-                meeting_id="204 255 15",
-                join_time=dt.strptime("Wed, 27 July 2016 13:30:01", '%a, %d %B %Y %H:%M:%S')
-            )
-            for i in [19, 20]
-        ],
-        return_defaults=True,
-    )
-    db.session.commit()
-
-    db.session.bulk_save_objects(
-        [
-            Attendance(
-                user_id=f"{i}",
-                meeting_id="204 255 15",
-                join_time=dt.strptime("Wed, 27 July 2016 13:30:02", '%a, %d %B %Y %H:%M:%S')
-            )
-            for i in [21, 22, 23, 24, 25]
-        ],
-        return_defaults=True,
-    )
-    db.session.commit()
+from app import db
+from random import seed
+from random import randint
+seed(1)
 
 
 def generate_emotions(path):
@@ -68,7 +13,7 @@ def generate_emotions(path):
         [
             Emotion(
                 user_id=row[1],
-                meeting_id="204 255 15",
+                meeting_id=2,
                 time_stamp=dt.strptime(row['time'], '%a, %d %B %Y %H:%M:%S'),
                 value=row['emotion']
             )
@@ -79,21 +24,62 @@ def generate_emotions(path):
     db.session.commit()
 
 
+def generate():
+    meeting = Meeting.start_meeting("204 255 17", dt.strptime('21/05/21 09:00:00', '%d/%m/%y %H:%M:%S'))
+    meeting = Meeting.end_meeting(meeting, dt.strptime('21/05/21 11:00:00', '%d/%m/%y %H:%M:%S'))
+
+    db.session.bulk_save_objects(
+        [
+            Attendance(
+                user_id=i + 1,
+                meeting_id=3,
+                join_time=dt.strptime('21/05/21 09:00:00', '%d/%m/%y %H:%M:%S')
+            )
+            for i in range(18)
+        ],
+        return_defaults=True,
+    )
+    db.session.commit()
+
+    db.session.bulk_save_objects(
+        [
+            Attendance(
+                user_id=i,
+                meeting_id=3,
+                join_time=dt.strptime('21/05/21 09:02:00', '%d/%m/%y %H:%M:%S')
+            )
+            for i in [19, 20]
+        ],
+        return_defaults=True,
+    )
+    db.session.commit()
+
+    db.session.bulk_save_objects(
+        [
+            Attendance(
+                user_id=i,
+                meeting_id=3,
+                join_time=dt.strptime('21/05/21 09:05:00', '%d/%m/%y %H:%M:%S')
+            )
+            for i in [21, 22, 23, 24, 25]
+        ],
+        return_defaults=True,
+    )
+    db.session.commit()
+
+
 if __name__ == "__main__":
-    df = pd.read_csv('dummy_data.csv')
-    emotions = []
-    for i, row in df.iterrows():
-        if row['valence'] > 0 and row['arousal'] > 0:
-            emotions.append(0)
-        elif row['valence'] < 0 and row['arousal'] > 0:
-            emotions.append(1)
-        elif row['valence'] < 0 and row['arousal'] < 0:
-            emotions.append(2)
-        else:
-            emotions.append(3)
-
-    df.drop(columns=['valence', 'arousal'])
-
-    df['emotion'] = emotions
-
-    df.to_csv('dummy.csv')
+    db.session.bulk_save_objects(
+        [
+            Emotion(
+                user_id=i,
+                meeting_id=2,
+                time_stamp=dt.strptime(f'21/05/21 13:{j}:00', '%d/%m/%y %H:%M:%S'),
+                value=randint(-1, 3)
+            )
+            for i in range(1, 11)
+            for j in range(10, 10)
+        ],
+        return_defaults=True,
+    )
+    db.session.commit()

@@ -1,18 +1,23 @@
-import itertools
-import operator
+import time
 
-from flask import jsonify, request, make_response
+from flask import jsonify, request, make_response, Response
 from flask_socketio import *
-from flask_cors import CORS, cross_origin
 from models import *
 from settings import *
 from datetime import datetime as dt
 from ml_model import batch_prediction
 from service_streamer import ThreadedStreamer
+from werkzeug.utils import secure_filename
 
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
+
+class_names = ['Positively-Active',
+               'Negatively-Active',
+               'Negatively-Passive',
+               'Positively-Passive',
+               'No Face']
 
 
 # SocketIO Events
@@ -41,30 +46,22 @@ def on_leave(data):
     print('A user has left room ' + room)
     send('You have left the room.', to=room)
 
-# Todo:: remove this route
-# @app.route('/stream_predict', methods=['POST'])
-# def stream_predict():
-#     frame = request.files['frame']
-#     meeting_id = request.form.get('meeting_id')
-#     user_id = request.form.get('user_id')
-#     time_stamp = request.form.get('time_stamp')
-#     user = User.get_user(user_id)
-#     meeting = Meeting.get_meeting(meeting_id)
-#     if not time_stamp:
-#         time_stamp = dt.now()
-#     else:
-#         time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
-#     if user and meeting and frame:
-#         img_bytes = frame.read()
-#         emotion = streamer.predict([img_bytes])[0]
-#         time_stamp = time_stamp.replace(microsecond=0)
-#         socketio.emit('emotion_predicted', {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'value': emotion}, to=meeting_id)
-#         Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
-#         return {'emotion': emotion}
-#     else:
-#         return make_response(
-#             'An error happened! Please make sure to provide the correct parameters.'
-#         )
+
+@app.route('/offline_analysis', methods=['POST'])
+def offline_analysis():
+    video = request.files['video']
+    filename = secure_filename(video.filename)
+    if not allowed_file(filename):
+        return Response({'The file should have one of the following formats: mp4, ogg, webm.'}, status=201)
+    else:
+        time.sleep(5)
+        data = [['00:00', '00:01', '00:02', '00:03', '00:04', '00:05', '00:06', '00:07', '00:08', '00:09', '00:10'],
+                [[0, 5, 6, 6, 6, 5, 4, 3, 4, 4, 3],
+                 [0, 1, 1, 0, 1, 2, 2, 1, 0, 0, 0],
+                 [0, 3, 2, 3, 3, 5, 4, 5, 3, 1, 1],
+                 [0, 5, 6, 7, 6, 6, 5, 6, 7, 8, 5],
+                 [0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0]]]
+        return jsonify(data)
 
 
 @app.route('/predict', methods=['POST'])
@@ -106,11 +103,9 @@ def predict():
     return {'results': results, 'messages': messages}
 
 
-
-# TODO post
-@app.route('/start_meeting', methods=['GET'])
+@app.route('/start_meeting', methods=['POST'])
 def start_meeting():
-    meeting_id = request.args.get('meeting_id')
+    meeting_id = request.form.get('meeting_id')
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
@@ -176,7 +171,9 @@ def past_meetings():
     past_meetings = Meeting.get_past_meetings()
 
     for meeting in past_meetings:
-        meeting_dict = {'analysis': meeting.get_meeting_analysis(),
+        labels, data = meeting.get_meeting_analysis()
+        meeting_dict = {'data': data,
+                        'labels': labels,
                         'id': meeting.meeting_id,
                         'start_time': meeting.start_time
                         }
@@ -243,6 +240,31 @@ def user_by_meeting():
     return result_dic
 
 
+@app.route('/get_meeting_details', methods=['GET'])
+def get_meeting_details():
+    user_emotions = {}
+    meeting_id = request.args.get('meeting_id')
+    meeting = Meeting.get_meeting(meeting_id)
+    if meeting:
+        emotions = meeting.emotions
+        list_of_users = [emotion.user for emotion in emotions]
+        for user in list_of_users:
+            user_emotions[int(user.id)] = {
+                "user_id": str(user.user_id),
+                "user_name": str(user.user_name),
+                "time_stamps": [],
+                "emotions": []
+            }
+        if emotions:
+            for emotion in emotions:
+                user_emotions[int(emotion.user_id)].get("time_stamps").append(emotion.time_stamp.strftime("%H:%M:%S"))
+                user_emotions[int(emotion.user_id)].get("emotions").append(class_names[int(emotion.value)])
+
+            return jsonify(list(user_emotions.values()))
+        return f'Emotions for meeting with id {meeting_id} Not found'
+    return f'Meeting with id {meeting_id} Not found'
+
+
 @app.route('/attendances', methods=['GET'])
 def attendances():
     meeting_id = request.args.get('meeting_id')
@@ -255,13 +277,11 @@ def attendances():
         )
 
 
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello'})
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg"]
 
 
-# ===================
-# USER ROUTES
 @app.route('/create_user', methods=['POST'])
 def create_user():
     user_id = request.form.get('user_id')
@@ -285,7 +305,6 @@ def get_user():
         return f'user with id {user_id} does not exist!'
 
 
-# EMOTION ROUTES
 @app.route('/get_emotion', methods=['GET'])  # get emotion by user and meeting
 def get_emotion():
     user_id = request.args.get('user_id')

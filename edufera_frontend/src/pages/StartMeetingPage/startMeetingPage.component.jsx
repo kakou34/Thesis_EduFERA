@@ -29,7 +29,7 @@ class StartMeetingPage extends React.Component {
                             />
                         </form>
                         <div className='btnAnalysisContainer'>
-                            <div class='btnAnalysis'>
+                            <div className='btnAnalysis'>
                                 <Link to={`/current/${this.state.meetingID}`} style={{
                                     textDecoration: 'none',
                                     color: 'white',
@@ -38,6 +38,8 @@ class StartMeetingPage extends React.Component {
                                 }}>Start Analysis</Link>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
             </div>

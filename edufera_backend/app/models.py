@@ -63,54 +63,12 @@ class Attendance(db.Model):
 
 
 @dataclass
-class Emotion(db.Model):
-    meeting_id: int
-    user_id: int
-    time_stamp: datetime
-    value: int
-
-    __tablename__ = "emotion"
-    id = db.Column(db.Integer, primary_key=True)
-    meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
-    value = db.Column(db.Integer, nullable=False)
-
-    def __init__(self, meeting_id, user_id, value, time_stamp):
-        self.meeting_id = meeting_id
-        self.user_id = user_id
-        self.value = value
-        self.time_stamp = time_stamp.replace(microsecond=0)
-
-    def __repr__(self):
-        return f"{self.time_stamp}:{self.value}"
-
-    @classmethod
-    def get_emotion(cls, emotion_id):
-        emotion = cls.query.get(emotion_id)
-        return emotion
-
-    @classmethod
-    def save_emotion(cls, meeting_id, user_id, value, time_stamp=datetime.now()):
-        emotion = cls(meeting_id, user_id, value, time_stamp.replace(microsecond=0))
-        db.session.add(emotion)
-        db.session.commit()
-        return emotion
-
-    @classmethod
-    def bulk_save_emotions(cls, emotions):
-        db.session.add_all(emotions)
-        db.session.commit()
-
-
-@dataclass
 class User(db.Model):
     __tablename__ = "user"
 
     user_id: str
     user_name: str
     attendances: Attendance
-    emotions: Emotion
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(), unique=True, nullable=False)
@@ -137,6 +95,43 @@ class User(db.Model):
         db.session.commit()
         return user
 
+
+@dataclass
+class Emotion(db.Model):
+    meeting_id: int
+    user_id: int
+    time_stamp: datetime
+    value: int
+    user: User
+
+    __tablename__ = "emotion"
+    id = db.Column(db.Integer, primary_key=True)
+    meeting_id = db.Column(db.Integer, db.ForeignKey('meeting.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User")
+    time_stamp = db.Column(db.DateTime(), nullable=False)  # time of the frame received from the video conference
+    value = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, meeting_id, user_id, value, time_stamp):
+        self.meeting_id = meeting_id
+        self.user_id = user_id
+        self.value = value
+        self.time_stamp = time_stamp.replace(microsecond=0)
+
+    def __repr__(self):
+        return f"{self.time_stamp}:{self.value}"
+
+    @classmethod
+    def get_emotion(cls, emotion_id):
+        emotion = cls.query.get(emotion_id)
+        return emotion
+
+    @classmethod
+    def save_emotion(cls, meeting_id, user_id, value, time_stamp=datetime.now()):
+        emotion = cls(meeting_id, user_id, value, time_stamp.replace(microsecond=0))
+        db.session.add(emotion)
+        db.session.commit()
+        return emotion
 
 @dataclass
 class Meeting(db.Model):
@@ -185,26 +180,21 @@ class Meeting(db.Model):
         meetings = cls.query.filter(cls.end_time < current_time).all()
         return meetings
 
-    # @classmethod
     def get_meeting_analysis(self):
-        # meeting = cls.query.filter_by(meeting_id=meeting_id).first()
-        emotions_list = [{"id": "Active Pleasant",     "data": []},
-                         {"id": "Active Unpleasant",   "data": []},
-                         {"id": "Inactive Unpleasant", "data": []},
-                         {"id": "Inactive Pleasant",   "data": []},
-                         {"id": "No Face",             "data": []}]
-        # if meeting:
+        emotions_list = [[], [], [], [], []]
+        time_stamps = []
         get_attr = operator.attrgetter('time_stamp')
         time_stamp_list = [list(g) for k, g in itertools.groupby(sorted(self.emotions, key=get_attr), get_attr)]
 
         for time_list in time_stamp_list:
+            time_stamps.append(datetime.strftime(time_list[0].time_stamp, "%H:%M:%S"))
             student_no = [0] * 5  # stores the number of students in each class at current time
             for emotion in time_list:
                 student_no[int(emotion.value)] += 1
             for i in range(5):
-                data = emotions_list[i]['data']
-                data.append({'x': str(time_list[0].time_stamp), 'y': student_no[i]})
-        return emotions_list
+                data = emotions_list[i]
+                data.append(student_no[i])
+        return time_stamps, emotions_list
 
 
 def first(iterable, default=None):
@@ -213,6 +203,5 @@ def first(iterable, default=None):
     return default
 
 
-#i get meeting id -> i goto emotions table , get with the metting id given -> group'em by the user -> [ {user id: 'sfds', 'user_name' : 'username' emotions : [ {time : "sdf", emotion":'s'}]]
 
 
