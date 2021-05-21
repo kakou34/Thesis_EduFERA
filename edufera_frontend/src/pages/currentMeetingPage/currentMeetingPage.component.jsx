@@ -7,8 +7,8 @@ import {PolarArea, Pie} from "react-chartjs-2";
 
 const CurrentMeetingPage = (props) => {
     const roomId = props.match.params.meetingId // Gets roomId (meetingId) from URL
-    const [status, setStatus] = useState('');
-    const [time, setTime] = useState('');
+    const [status, setStatus] = useState('Online');
+    const [time, setTime] = useState('15:00:00');
     const [data, setData] = useState([5, 3, 5, 4, 0]);
 
     useEffect(() => {
@@ -44,6 +44,21 @@ const CurrentMeetingPage = (props) => {
     return (
         <div className='current'>
             <div className='meetingContainer'>
+            <div style={{
+            display:'flex',
+            flexDirection: 'row',
+            width:'100%',
+            justifyContent: 'space-between',
+
+
+            }}>
+            <div className='txt-container'>
+                    <p className='txt'>Time: {time}</p>
+                </div>
+                <div className='txt-container'>
+                    <p className='txt'>Status: {status}</p>
+                </div>
+                </div>
                 <div className='diagramCurrent-cont'>
                     <PolarArea
                         data={
@@ -58,11 +73,11 @@ const CurrentMeetingPage = (props) => {
                                         label: time,
                                         data: data,
                                         backgroundColor: [
-                                            'rgba(255, 99, 132, 0.8)',
-                                            'rgba(54, 162, 235, 0.8)',
-                                            'rgba(255, 206, 86, 0.8)',
-                                            'rgba(75, 192, 192, 0.8)',
-                                            'rgba(153, 102, 255, 0.6)',
+                                            'red',
+                                            '#27E10D',
+                                            'orange',
+                                            '#11DBCC',
+                                            'grey',
                                         ],
                                         borderWidth: 1.5,
                                     },
@@ -78,16 +93,22 @@ const CurrentMeetingPage = (props) => {
                             },
                             plugins: {
                                 legend: {
-                                    position: 'right'
+                                    position: 'bottom',
+                                    labels: {
+                                    boxHeight:20,
+                                    boxWidth:40,
+                                    color: 'black',
+                                    padding: 10
+                                    }
+
+
                                 }
                             }
 
                         }}
                     />
                 </div>
-                <div className='txt-container'>
-                    <p className='txt'>{status}</p>
-                </div>
+
             </div>
         </div>
     )
