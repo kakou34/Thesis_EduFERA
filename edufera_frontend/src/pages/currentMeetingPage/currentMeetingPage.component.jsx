@@ -53,7 +53,7 @@ const CurrentMeetingPage = (props) => {
 
             }}>
             <div className='txt-container'>
-                    <p className='txt'>Time: {time}</p>
+                    <p className='txt'>Emotion detected at: {time}</p>
                 </div>
                 <div className='txt-container'>
                     <p className='txt'>Status: {status}</p>
@@ -73,11 +73,11 @@ const CurrentMeetingPage = (props) => {
                                         label: time,
                                         data: data,
                                         backgroundColor: [
-                                            'red',
-                                            '#27E10D',
-                                            'orange',
-                                            '#11DBCC',
-                                            'grey',
+                                            'rgba(225,0,0, 0.9)',
+                                            'rgba(64,255,13, 0.9)',
+                                            'rgba(225,116,13, 0.9)',
+                                            'rgba(13,255,199, 0.9)',
+                                            'rgba(128,128,128, 0.9)',
                                         ],
                                         borderWidth: 1.5,
                                     },
