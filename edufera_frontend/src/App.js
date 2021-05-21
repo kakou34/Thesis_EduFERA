@@ -7,7 +7,7 @@ import Header from './components/header/header.component';
 import CurrentMeetingPage from "./pages/CurrentMeetingPage/currentMeetingPage.component";
 import UsersPage from "./pages/UsersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
-import RecordedMeetingPage from "./pages/recordedMeetingPage/recordedMeetingPage.component";
+import RecordedMeetingPage from "./pages/RecordedMeetingPage/recordedMeetingPage.component";
 import io from 'socket.io-client'
 
 export const socket = io.connect('http://localhost:5000/', {transports: ['websocket'], upgrade: false})
