@@ -69,9 +69,9 @@ class MeetingsListItems extends React.Component {
                                                   label: "Inactive Unpleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: '#007EF5',
-                                                  borderColor: '#007EF5',
-                                                  borderWidth: 1,
+                                                  backgroundColor: '#F59800',
+                                                  borderColor: '#F59800',
+                                                  borderWidth: 1.8,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[2]
                                               }, {
@@ -79,9 +79,9 @@ class MeetingsListItems extends React.Component {
                                                   label: "Inactive Pleasant",
                                                   fill: false,
                                                   lineTension: 0.5,
-                                                  backgroundColor: '#F59800',
-                                                  borderColor: '#F59800',
-                                                  borderWidth: 1.8,
+                                                  backgroundColor: '#007EF5',
+                                                  borderColor: '#007EF5',
+                                                  borderWidth: 1,
                                                   pointRadius: 0.1,
                                                   data: this.props.data[3]
                                               }, {
