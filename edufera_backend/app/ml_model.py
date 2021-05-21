@@ -17,6 +17,7 @@ face_detector = MTCNN(image_size=48,
                       factor=0.709,
                       post_process=False,
                       device=device, keep_all=False)
+multi_face_detector = MTCNN(margin=20, keep_all=True, post_process=False, device=device)
 
 
 def fixed_image_standardization(image_tensor):
@@ -90,7 +91,7 @@ def video_prediction(video):
         frames.append(Image.fromarray(frame))
 
     # Detect faces in batch
-    faces = face_detector(frames)
+    faces = multi_face_detector(frames)
     data = [["0", "1", "2", "3", "4"]]
     results = []
     for i, frame_faces in enumerate(faces):
@@ -102,7 +103,7 @@ def video_prediction(video):
             _, y_hat = outputs.max(1)
             results.append([y_hat.tolist().count(0), y_hat.tolist().count(1), y_hat.tolist().count(2), y_hat.tolist().count(3)])
     data.append(np.array(results).T.tolist())
-    return results
+    return data
 
 
 if __name__ == "__main__":
