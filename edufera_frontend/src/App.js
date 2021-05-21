@@ -13,18 +13,6 @@ import io from 'socket.io-client'
 export const socket = io.connect('http://localhost:5000/', {transports: ['websocket'], upgrade: false})
 
 class App extends React.Component {
-    constructor() {
-        super();
-
-        //Just example state before I get the real data
-
-    }
-
-    //Empty for now to fetch data
-    componentDidMount() {
-
-    }
-
 
     render() {
         return (
@@ -33,7 +21,7 @@ class App extends React.Component {
                 <Switch>
                     <Route exact path='/' component={PastMeetingsPage}/>
                     <Route exact path='/current/:meetingId' component={CurrentMeetingPage}/>
-                    <Route exact path='/usersPage' component={UsersPage}/>
+                    <Route path='/usersPage/:meetingId' render={(props) => <UsersPage {...props}/>}/>
                     <Route exact path='/startAnalysis' component={StartMeetingPage}/>
                     <Route exact path='/offlineAnalysis' component={RecordedMeetingPage}/>
                 </Switch>

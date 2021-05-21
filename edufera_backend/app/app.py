@@ -13,6 +13,12 @@ socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
 
+class_names = ['Positively-Active',
+               'Negatively-Active',
+               'Negatively-Passive',
+               'Positively-Passive',
+               'No Face']
+
 
 # SocketIO Events
 @socketio.on('connect')
@@ -83,9 +89,9 @@ def stream_predict():
 
 
 # TODO post
-@app.route('/start_meeting', methods=['GET'])
+@app.route('/start_meeting', methods=['POST'])
 def start_meeting():
-    meeting_id = request.args.get('meeting_id')
+    meeting_id = request.form.get('meeting_id')
     if meeting_id:
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
@@ -220,6 +226,31 @@ def user_by_meeting():
     return result_dic
 
 
+@app.route('/get_meeting_details', methods=['GET'])
+def get_meeting_details():
+    user_emotions = {}
+    meeting_id = request.args.get('meeting_id')
+    meeting = Meeting.get_meeting(meeting_id)
+    if meeting:
+        emotions = meeting.emotions
+        list_of_users = [emotion.user for emotion in emotions]
+        for user in list_of_users:
+            user_emotions[int(user.id)] = {
+                "user_id": str(user.user_id),
+                "user_name": str(user.user_name),
+                "time_stamps": [],
+                "emotions": []
+            }
+        if emotions:
+            for emotion in emotions:
+                user_emotions[int(emotion.user_id)].get("time_stamps").append(emotion.time_stamp.strftime("%H:%M:%S"))
+                user_emotions[int(emotion.user_id)].get("emotions").append(class_names[int(emotion.value)])
+
+            return jsonify(list(user_emotions.values()))
+        return f'Emotions for meeting with id {meeting_id} Not found'
+    return f'Meeting with id {meeting_id} Not found'
+
+
 @app.route('/attendances', methods=['GET'])
 def attendances():
     meeting_id = request.args.get('meeting_id')
@@ -232,18 +263,11 @@ def attendances():
         )
 
 
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello'})
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg"]
 
 
-# ===================
-# USER ROUTES
 @app.route('/create_user', methods=['POST'])
 def create_user():
     user_id = request.form.get('user_id')
@@ -267,7 +291,6 @@ def get_user():
         return f'user with id {user_id} does not exist!'
 
 
-# EMOTION ROUTES
 @app.route('/get_emotion', methods=['GET'])  # get emotion by user and meeting
 def get_emotion():
     user_id = request.args.get('user_id')
