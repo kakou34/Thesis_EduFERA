@@ -7,7 +7,7 @@ from vgg_m_face_bn_fer_dag import vgg_m_face_bn_fer_dag
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg_wts.pth')
+model = vgg_m_face_bn_fer_dag('C:/EduFERA/Thesis_EduFERA/checkpoints/vgg16_fin_upd.pth')
 model.to(device)
 model.eval()
 

@@ -4,8 +4,8 @@ import {Switch, Route} from 'react-router-dom';
 
 import PastMeetingsPage from './pages/PastMeetingsPage/pastMeetingsPage.component'
 import Header from './components/header/header.component';
-import CurrentMeetingPage from "./pages/currentMeetingPage/currentMeetingPage.component";
-import UsersPage from "./pages/usersPage/usersPage.component";
+import CurrentMeetingPage from "./pages/CurrentMeetingPage/currentMeetingPage.component";
+import UsersPage from "./pages/UsersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
 import RecordedMeetingPage from "./pages/recordedMeetingPage/recordedMeetingPage.component";
 import io from 'socket.io-client'
