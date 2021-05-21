@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg_wts.pth')
+model = vgg_m_face_bn_fer_dag('C:/Users/Ridwan/Documents/vgg16_fin_upd.pth')
 model.to(device)
 model.eval()
 
@@ -70,7 +70,7 @@ def batch_prediction(image_bytes_batch):
 
 # RIDWAN'S CODE
 def video_prediction(video):
-    v_cap = cv2.VideoCapture(video.filename)
+    v_cap = cv2.VideoCapture(video)
     v_len = int(v_cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # Loop through video, taking a handful of frames to form a batch
     frames = []

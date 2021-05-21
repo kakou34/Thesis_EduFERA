@@ -1,5 +1,5 @@
 import time
-
+import cv2
 from flask import jsonify, request, make_response, Response
 from flask_socketio import *
 from models import *
@@ -43,12 +43,17 @@ def on_leave(data):
 
 @app.route('/offline_analysis', methods=['POST'])
 def offline_analysis():
+    uploads_dir = os.path.join(app.root_path, 'uploads')
+
     video = request.files['video']
+
     filename = secure_filename(video.filename)
     if not allowed_file(filename):
         return Response({'The file should have one of the following formats: mp4, ogg, webm.'}, status=201)
     else:
-        predicted_result = video_prediction(video)
+        video.save(os.path.join(uploads_dir, secure_filename(video.filename)))
+
+        predicted_result = video_prediction(os.path.join(uploads_dir, secure_filename(video.filename)))
         return jsonify(predicted_result)
 
 
