@@ -98,8 +98,6 @@ const CurrentMeetingPage = (props) => {
                                         color: 'black',
                                         padding: 10
                                     }
-
-
                                 }
                             }
 

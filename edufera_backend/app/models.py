@@ -133,6 +133,12 @@ class Emotion(db.Model):
         db.session.commit()
         return emotion
 
+    @staticmethod
+    def bulk_save_emotions(emotions):
+        db.session.bulk_save_objects(emotions)
+        db.session.commit()
+
+
 @dataclass
 class Meeting(db.Model):
     meeting_id: str

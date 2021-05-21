@@ -93,7 +93,7 @@ def predict():
         else:
             img_bytes = frames[i].read()
             emotion = streamer.predict([img_bytes])[0]
-            emotions.append(Emotion(meeting_id=meeting.id, user_id= user.id, value=emotion, time_stamp=time_stamp))
+            emotions.append(Emotion(meeting_id=meeting.id, user_id=user.id, value=emotion, time_stamp=time_stamp))
             results[emotion] += 1
     socketio.emit('emotion_predicted',
                   {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'results': results},
