@@ -122,43 +122,43 @@ class RecordedMeetingPage extends React.Component {
                                     type: "line",
                                     label: "Active Pleasant",
                                     fill: false,
-                                    lineTension: 0.5,
                                     backgroundColor: 'green',
                                     borderColor: 'green',
                                     borderWidth: 1,
                                     pointRadius: 0.1,
                                     data: this.state.data[1][0],
-                                    tension: 0.1
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Active Unpleasant",
                                     fill: false,
-                                    lineTension: 0.5,
                                     backgroundColor: 'red',
                                     borderColor: 'red',
                                     borderWidth: 2,
                                     pointRadius: 0.1,
-                                    data: this.state.data[1][1]
+                                    data: this.state.data[1][1],
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Inactive Unpleasant",
                                     fill: false,
-                                    lineTension: 0.5,
                                     backgroundColor: 'orange',
                                     borderColor: 'orange',
                                     borderWidth: 2,
                                     pointRadius: 0.1,
-                                    data: this.state.data[1][2]
+                                    data: this.state.data[1][2],
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Inactive Pleasant",
                                     fill: false,
-                                    lineTension: 0.5,
+                                    lineTension: 0.2,
                                     backgroundColor: 'blue',
                                     borderColor: 'blue',
                                     borderWidth: 1,
                                     pointRadius: 0.1,
                                     data: this.state.data[1][3]
+
                                 }
                             ]
                         }}
