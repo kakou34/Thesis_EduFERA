@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = vgg_m_face_bn_fer_dag('C:/Users/Ridwan/Documents/vgg16_fin_upd.pth')
+model = vgg_m_face_bn_fer_dag('C:/Users/99926527616etu/PycharmProjects/Thesis_EduFERA/checkpoints/vgg.pth')
 model.to(device)
 model.eval()
 
@@ -49,7 +49,7 @@ def get_prediction(image_bytes):
 def batch_prediction(image_bytes_batch):
     size = len(image_bytes_batch)
     results = [None] * size
-    images = [Image.open(io.BytesIO(image_bytes)).resize((256, 256))
+    images = [Image.open(io.BytesIO(image_bytes)).convert('RGB').resize((256, 256))
               for image_bytes in image_bytes_batch]
     faces = face_detector(images)
     for j in range(size):
@@ -109,11 +109,11 @@ def video_prediction(video):
 if __name__ == "__main__":
     image_bytes_batch = []
 
-    with open(r"giroud.jpg", 'rb') as f:
+    with open(r"user1.png", 'rb') as f:
         image_bytes = f.read()
         image_bytes_batch.append(image_bytes)
 
-    with open(r"giroud.jpg", 'rb') as f:
+    with open(r"user1.png", 'rb') as f:
         image_bytes = f.read()
         image_bytes_batch.append(image_bytes)
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         image_bytes = f.read()
         image_bytes_batch.append(image_bytes)
 
-    with open(r"giroud.jpg", 'rb') as f:
+    with open(r"user1.png", 'rb') as f:
         image_bytes = f.read()
         image_bytes_batch.append(image_bytes)
 

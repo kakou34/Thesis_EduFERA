@@ -13,6 +13,12 @@ socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
 CORS(app)
 
+class_names = ['Positively-Active',
+               'Negatively-Active',
+               'Negatively-Passive',
+               'Positively-Passive',
+               'No Face']
+
 
 # SocketIO Events
 @socketio.on('connect')
@@ -57,31 +63,47 @@ def offline_analysis():
         return jsonify(predicted_result)
 
 
-@app.route('/stream_predict', methods=['POST'])
-def stream_predict():
-    frame = request.files['frame']
+@app.route('/predict', methods=['POST'])
+def predict():
     meeting_id = request.form.get('meeting_id')
-    user_id = request.form.get('user_id')
     time_stamp = request.form.get('time_stamp')
-    user = User.get_user(user_id)
-    meeting = Meeting.get_meeting(meeting_id)
     if not time_stamp:
-        time_stamp = dt.now()
-    if not user:
-        return make_response('User not found')
-    if not meeting:
-        return make_response('Meeting not found')
-    if not frame:
-        return make_response('Frame not found')
-    img_bytes = frame.read()
-    emotion = streamer.predict([img_bytes])[0]
-    time_stamp = time_stamp.replace(microsecond=0)
-    socketio.emit('emotion_predicted', {'time_stamp': str(time_stamp), 'value': emotion}, to=meeting_id)
-    Emotion.save_emotion(meeting.id, user.id, emotion, time_stamp)
-    return {'emotion': emotion}
+        time_stamp = dt.now().replace(microsecond=0)
+    else:
+        time_stamp = dt.strptime(time_stamp, '%d/%m/%y %H:%M:%S')
+    frames = request.files.getlist("frame")
+    user_ids = request.form.getlist('user_id')
 
+    if len(frames) != len(user_ids):
+        return make_response('The number of Users and Images must be the same')
+
+    meeting = Meeting.get_meeting(meeting_id)
+    if not meeting:
+        return make_response(f'Meeting with id {meeting_id} does not exist!')
+
+    results = [0]*5
+    emotions = []
+    messages = []
+
+    for i in range(len(frames)):
+        user = User.get_user(user_ids[i])
+        if not user:
+            messages.append(f'User with id {user_ids[i]} does not exist!')
+        else:
+            img_bytes = frames[i].read()
+            emotion = streamer.predict([img_bytes])[0]
+            emotions.append(Emotion(meeting_id=meeting.id, user_id=user.id, value=emotion, time_stamp=time_stamp))
+            results[emotion] += 1
+    socketio.emit('emotion_predicted',
+                  {'time_stamp': dt.strftime(time_stamp, "%H:%M:%S"), 'results': results},
+                  to=meeting_id)
+    Emotion.bulk_save_emotions(emotions)
+
+    return {'results': results, 'messages': messages}
 
 # TODO post
+@app.route('/start_meeting', methods=['POST'])
+
 @app.route('/start_meeting', methods=['POST'])
 def start_meeting():
     meeting_id = request.form.get('meeting_id')
@@ -219,6 +241,31 @@ def user_by_meeting():
     return result_dic
 
 
+@app.route('/get_meeting_details', methods=['GET'])
+def get_meeting_details():
+    user_emotions = {}
+    meeting_id = request.args.get('meeting_id')
+    meeting = Meeting.get_meeting(meeting_id)
+    if meeting:
+        emotions = meeting.emotions
+        list_of_users = [emotion.user for emotion in emotions]
+        for user in list_of_users:
+            user_emotions[int(user.id)] = {
+                "user_id": str(user.user_id),
+                "user_name": str(user.user_name),
+                "time_stamps": [],
+                "emotions": []
+            }
+        if emotions:
+            for emotion in emotions:
+                user_emotions[int(emotion.user_id)].get("time_stamps").append(emotion.time_stamp.strftime("%H:%M:%S"))
+                user_emotions[int(emotion.user_id)].get("emotions").append(class_names[int(emotion.value)])
+
+            return jsonify(list(user_emotions.values()))
+        return f'Emotions for meeting with id {meeting_id} Not found'
+    return f'Meeting with id {meeting_id} Not found'
+
+
 @app.route('/attendances', methods=['GET'])
 def attendances():
     meeting_id = request.args.get('meeting_id')
@@ -231,18 +278,11 @@ def attendances():
         )
 
 
-@app.route('/test')
-def test():
-    return jsonify({'message': 'Hello'})
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg", "avi"]
 
 
-# ===================
-# USER ROUTES
 @app.route('/create_user', methods=['POST'])
 def create_user():
     user_id = request.form.get('user_id')
@@ -266,7 +306,6 @@ def get_user():
         return f'user with id {user_id} does not exist!'
 
 
-# EMOTION ROUTES
 @app.route('/get_emotion', methods=['GET'])  # get emotion by user and meeting
 def get_emotion():
     user_id = request.args.get('user_id')

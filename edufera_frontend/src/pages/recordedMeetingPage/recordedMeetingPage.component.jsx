@@ -25,7 +25,7 @@ class RecordedMeetingPage extends React.Component {
     };
 
     onFileUpload = () => {
-        if(this.state.selectedFile === null) {
+        if (this.state.selectedFile === null) {
             toast.error('Please choose a video!')
         } else {
             this.setState({isLoading: true})
@@ -60,17 +60,29 @@ class RecordedMeetingPage extends React.Component {
         if (this.state.selectedFile) {
 
             return (
-                <div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: 300,
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    borderColor: '#000',
+                    borderRadius: 10,
+                    border: 'solid',
+                    borderWidth: 2,
+                    marginTop: 10
+
+                }}>
                     <h2>File Details:</h2>
-                    <p>File Name: {this.state.selectedFile.name}</p>
-                    <p>File Type: {this.state.selectedFile.type}</p>
+                    <h4>File Name: {this.state.selectedFile.name}</h4>
+                    <h4>File Type: {this.state.selectedFile.type}</h4>
                 </div>
             );
         } else {
             return (
                 <div>
                     <br/>
-                    <h4>Choose before Pressing the Analyse button</h4>
+                    <h4 style={{textAlign: 'center'}}>Please first choose a file before pressing the Analyse button</h4>
                 </div>
             );
         }
@@ -85,8 +97,24 @@ class RecordedMeetingPage extends React.Component {
         return (
             <div className='meetingContainerForm'>
                 {this.state.isVideoProcessed ?
-                    <div style={{height: 500, width: 1000}}>
-                        <h1>Analysis Results</h1>
+                    <div style={{
+                        height: 600,
+                        width: 1555,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column',
+                        border: 'solid',
+                        borderWidth: 4,
+                        borderColor: '#0CF7DA',
+                        padding: 40,
+                        marginLeft: 20
+
+                    }}>
+                        <h1 style={{
+                            marginTop: 20,
+                            marginBottom: 20
+                        }}>Analysis Results</h1>
                         <Line data={{
                             labels: this.state.data[0],
                             datasets: [
@@ -94,53 +122,43 @@ class RecordedMeetingPage extends React.Component {
                                     type: "line",
                                     label: "Active Pleasant",
                                     fill: false,
-                                    lineTension: 0.5,
-                                    backgroundColor: 'rgba(75,192,192,1)',
-                                    borderColor: 'rgb(75, 192, 192)',
+                                    backgroundColor: 'green',
+                                    borderColor: 'green',
                                     borderWidth: 1,
                                     pointRadius: 0.1,
                                     data: this.state.data[1][0],
-                                    tension: 0.1
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Active Unpleasant",
                                     fill: false,
-                                    lineTension: 0.5,
-                                    backgroundColor: 'rgba(90,20,20,1)',
-                                    borderColor: 'rgba(90,20,20,1)',
-                                    borderWidth: 1,
+                                    backgroundColor: 'red',
+                                    borderColor: 'red',
+                                    borderWidth: 2,
                                     pointRadius: 0.1,
-                                    data: this.state.data[1][1]
+                                    data: this.state.data[1][1],
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Inactive Unpleasant",
                                     fill: false,
-                                    lineTension: 0.5,
-                                    backgroundColor: 'rgba(0,10,80,1)',
-                                    borderColor: 'rgba(0,10,80,1)',
-                                    borderWidth: 1,
+                                    backgroundColor: 'orange',
+                                    borderColor: 'orange',
+                                    borderWidth: 2,
                                     pointRadius: 0.1,
-                                    data: this.state.data[1][2]
+                                    data: this.state.data[1][2],
+                                    lineTension: 0.2
                                 }, {
                                     type: "line",
                                     label: "Inactive Pleasant",
                                     fill: false,
-                                    lineTension: 0.5,
-                                    backgroundColor: 'rgba(0,150,0,1)',
-                                    borderColor: 'rgba(0,150,0,1)',
+                                    lineTension: 0.2,
+                                    backgroundColor: 'blue',
+                                    borderColor: 'blue',
                                     borderWidth: 1,
                                     pointRadius: 0.1,
                                     data: this.state.data[1][3]
-                                }, {
-                                    type: "line",
-                                    label: "No Face",
-                                    fill: false,
-                                    lineTension: 0.5,
-                                    backgroundColor: 'rgba(128,128,128,1)',
-                                    borderColor: 'rgba(128,128,128,1)',
-                                    borderWidth: 1,
-                                    pointRadius: 0.1,
-                                    data: this.state.data[1][4]
+
                                 }
                             ]
                         }}
@@ -151,24 +169,54 @@ class RecordedMeetingPage extends React.Component {
                                       enabled: true
                                   },
                                   scales: {
-                                      xAxis: [
+                                      x:
                                           {
                                               ticks: {
                                                   autoSkip: true,
                                                   maxTicksLimit: 10
                                               },
                                           }
-                                      ]
+
                                   }
                               }}/>
                     </div>
                     :
                     <div className='currentForm'>
                         <div className='meetingContainerForm'>
-                            <div className='form-container'>
-                                <input type="file" onChange={this.onFileChange}/>
-                                <button onClick={this.onFileUpload}>
-                                    Analyse
+                            <div className='form-containerr'>
+                                <div style={{
+                                    width: 300,
+                                    height: 50,
+
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderColor: '#000',
+                                    borderRadius: 10,
+                                    border: 'solid',
+                                    borderWidth: 2
+
+
+                                }}>
+                                    <input type="file" onChange={this.onFileChange}/>
+                                </div>
+                                <button onClick={this.onFileUpload} style={{
+                                    width: 170,
+                                    height: 40,
+                                    backgroundColor: '#0e6b60',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: 10,
+                                    marginTop: 30
+                                }}>
+                                    <p style={{
+                                        fontSize: 16,
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        letterSpacing: 1.2
+                                    }}>Analyse</p>
+
                                 </button>
                                 {this.fileData()}
                             </div>
