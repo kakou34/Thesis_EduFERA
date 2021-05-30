@@ -238,7 +238,7 @@ def test():
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg"]
+           filename.rsplit('.', 1)[1].lower() in ["mp4", "webm", "ogg", "avi"]
 
 
 # ===================
