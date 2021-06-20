@@ -8,6 +8,9 @@ from datetime import datetime as dt
 from ml_model import batch_prediction, video_prediction
 from service_streamer import ThreadedStreamer
 from werkzeug.utils import secure_filename
+from random import seed
+from random import randint
+seed(1)
 
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
@@ -101,8 +104,19 @@ def predict():
 
     return {'results': results, 'messages': messages}
 
-# TODO post
-@app.route('/start_meeting', methods=['POST'])
+
+@app.route('/fake_predict', methods=['GET'])
+def fake_predict():
+    for i in range(10, 60, 2):
+        results = [randint(0, 25), randint(0, 25), randint(0, 25), randint(0, 25), randint(0, 10)]
+        time_stamp = f'14:00:{i}'
+        socketio.emit('emotion_predicted',
+                      {'time_stamp': time_stamp, 'results': results},
+                      to='123')
+        time.sleep(2)
+
+    return 'done'
+
 
 @app.route('/start_meeting', methods=['POST'])
 def start_meeting():
@@ -149,7 +163,6 @@ def get_meeting_status():
         return response
 
 
-# TODO post
 @app.route('/end_meeting', methods=['POST'])
 def end_meeting():
     meeting_id = request.form.get('meeting_id')
