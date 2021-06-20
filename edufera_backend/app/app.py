@@ -1,5 +1,4 @@
 import time
-import cv2
 from flask import jsonify, request, make_response, Response
 from flask_socketio import *
 from models import *
@@ -8,6 +7,9 @@ from datetime import datetime as dt
 from ml_model import batch_prediction, video_prediction
 from service_streamer import ThreadedStreamer
 from werkzeug.utils import secure_filename
+from random import seed
+from random import randint
+seed(1)
 
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True)
 streamer = ThreadedStreamer(batch_prediction, batch_size=64)
@@ -101,8 +103,19 @@ def predict():
 
     return {'results': results, 'messages': messages}
 
-# TODO post
-@app.route('/start_meeting', methods=['POST'])
+
+@app.route('/fake_predict', methods=['GET'])
+def fake_predict():
+    for i in range(10, 60, 2):
+        results = [randint(0, 25), randint(0, 25), randint(0, 25), randint(0, 25), randint(0, 10)]
+        time_stamp = f'14:00:{i}'
+        socketio.emit('emotion_predicted',
+                      {'time_stamp': time_stamp, 'results': results},
+                      to='123')
+        time.sleep(2)
+
+    return 'done'
+
 
 @app.route('/start_meeting', methods=['POST'])
 def start_meeting():
@@ -149,7 +162,6 @@ def get_meeting_status():
         return response
 
 
-# TODO post
 @app.route('/end_meeting', methods=['POST'])
 def end_meeting():
     meeting_id = request.form.get('meeting_id')
@@ -195,7 +207,6 @@ def analyse_meeting():
     return make_response('Invalid Meeting ID')
 
 
-# TODO create user if user no
 @app.route('/join_meeting', methods=['POST'])
 def join_meeting():
     meeting_id = request.form.get('meeting_id')
@@ -231,7 +242,6 @@ def join_meeting():
 
 @app.route('/user_by_meeting', methods=['GET'])
 def user_by_meeting():
-    meeting_id = request.args.get('meeting_id')
     result_dic = []
     for meeting in past_meetings:
         get_attr = operator.attrgetter('time_stamp')
@@ -323,7 +333,7 @@ def get_emotion():
         return f'user id and meeting id missing'
 
 
-@app.route('/save_emotion', methods=['POST'])  # get emotion by user and meeting
+@app.route('/save_emotion', methods=['POST'])
 def save_emotion():
     user_id = request.form.get('user_id')
     meeting_id = request.form.get('meeting_id')
