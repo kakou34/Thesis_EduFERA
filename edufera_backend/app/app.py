@@ -77,11 +77,11 @@ def predict():
     user_ids = request.form.getlist('user_id')
 
     if len(frames) != len(user_ids):
-        return make_response('The number of Users and Images must be the same')
+        return Response({'The number of Users and Images must be the same'}, status=201)
 
     meeting = Meeting.get_meeting(meeting_id)
     if not meeting:
-        return make_response(f'Meeting with id {meeting_id} does not exist!')
+        return Response(f'Meeting with id {meeting_id} does not exist!', status=202)
 
     results = [0]*5
     emotions = []
@@ -124,9 +124,7 @@ def start_meeting():
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
             socketio.emit('meeting_started', {'data': 'Started'}, broadcast=True, to=meeting_id)
-            return make_response(
-                f'Meeting: {meeting_id} already started!'
-            )
+            return Response(f'Meeting: {meeting_id} already started!', status=201)
         new_meeting = Meeting.start_meeting(meeting_id=meeting_id)
         socketio.emit('meeting_started', {'data': f'Meeting {meeting_id} Started!'}, broadcast=True, to=meeting_id)
         return {'id': new_meeting.id,
@@ -141,8 +139,8 @@ def get_meeting():
         existing_meeting = Meeting.get_meeting(meeting_id)
         if existing_meeting:
             return jsonify(existing_meeting)
-        return make_response(
-            f'Meeting: {meeting_id} does not exist!'
+        return Response(
+            f'Meeting: {meeting_id} does not exist!', status=201
         )
 
 
@@ -173,8 +171,8 @@ def end_meeting():
             return make_response(
                 f'Meeting: {meeting_id} ended!'
             )
-        return make_response(
-            f'Meeting: {meeting_id} does not exsist!'
+        return Response(
+            f'Meeting: {meeting_id} does not exsist!', status=201
         )
 
 
@@ -204,7 +202,7 @@ def analyse_meeting():
             emotions = meeting.get_meeting_analysis()
             return jsonify(emotions)
 
-    return make_response('Invalid Meeting ID')
+    return Response('Invalid Meeting ID', status=201)
 
 
 @app.route('/join_meeting', methods=['POST'])
@@ -224,7 +222,7 @@ def join_meeting():
             return jsonify(attendance)
         else:
             if not the_meeting:
-                return f'meeting with id {meeting_id} does not exist!'
+                return Response(f'meeting with id {meeting_id} does not exist!', status=201)
             else:
                 if not the_user:
                     if not user_name:
@@ -272,8 +270,8 @@ def get_meeting_details():
                 user_emotions[int(emotion.user_id)].get("emotions").append(class_names[int(emotion.value)])
 
             return jsonify(list(user_emotions.values()))
-        return f'Emotions for meeting with id {meeting_id} Not found'
-    return f'Meeting with id {meeting_id} Not found'
+        return Response(f'Emotions for meeting with id {meeting_id} Not found', status=202)
+    return Response(f'Meeting with id {meeting_id} Not found', status=201)
 
 
 @app.route('/attendances', methods=['GET'])
