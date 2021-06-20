@@ -69,7 +69,6 @@ def batch_prediction(image_bytes_batch):
     return results
 
 
-# RIDWAN'S CODE
 def video_prediction(video):
     v_cap = cv2.VideoCapture(video)
     v_len = int(v_cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -95,7 +94,7 @@ def video_prediction(video):
     data = [["0", "1", "2", "3", "4"]]
     results = []
     for i, frame_faces in enumerate(faces):
-        if len(frame_faces) != 0:
+        if frame_faces is not None and len(frame_faces) != 0:
             frame_faces = [transform_image(face) for face in frame_faces]
 
             inputs = torch.cat(frame_faces).to(device)
@@ -104,30 +103,3 @@ def video_prediction(video):
             results.append([y_hat.tolist().count(0), y_hat.tolist().count(1), y_hat.tolist().count(2), y_hat.tolist().count(3)])
     data.append(np.array(results).T.tolist())
     return data
-
-
-if __name__ == "__main__":
-    image_bytes_batch = []
-
-    with open(r"user1.png", 'rb') as f:
-        image_bytes = f.read()
-        image_bytes_batch.append(image_bytes)
-
-    with open(r"user1.png", 'rb') as f:
-        image_bytes = f.read()
-        image_bytes_batch.append(image_bytes)
-
-    with open(r"img.jpg", 'rb') as f:
-        image_bytes = f.read()
-        image_bytes_batch.append(image_bytes)
-
-    with open(r"user1.png", 'rb') as f:
-        image_bytes = f.read()
-        image_bytes_batch.append(image_bytes)
-
-    with open(r"img.jpg", 'rb') as f:
-        image_bytes = f.read()
-        image_bytes_batch.append(image_bytes)
-
-    out = batch_prediction(image_bytes_batch)
-    print(out)

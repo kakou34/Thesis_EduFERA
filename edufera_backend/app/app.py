@@ -1,5 +1,4 @@
 import time
-import cv2
 from flask import jsonify, request, make_response, Response
 from flask_socketio import *
 from models import *
@@ -208,7 +207,6 @@ def analyse_meeting():
     return make_response('Invalid Meeting ID')
 
 
-# TODO create user if user no
 @app.route('/join_meeting', methods=['POST'])
 def join_meeting():
     meeting_id = request.form.get('meeting_id')
@@ -244,7 +242,6 @@ def join_meeting():
 
 @app.route('/user_by_meeting', methods=['GET'])
 def user_by_meeting():
-    meeting_id = request.args.get('meeting_id')
     result_dic = []
     for meeting in past_meetings:
         get_attr = operator.attrgetter('time_stamp')
@@ -336,7 +333,7 @@ def get_emotion():
         return f'user id and meeting id missing'
 
 
-@app.route('/save_emotion', methods=['POST'])  # get emotion by user and meeting
+@app.route('/save_emotion', methods=['POST'])
 def save_emotion():
     user_id = request.form.get('user_id')
     meeting_id = request.form.get('meeting_id')
