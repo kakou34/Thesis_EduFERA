@@ -7,8 +7,10 @@ import Header from './components/header/header.component';
 import CurrentMeetingPage from "./pages/CurrentMeetingPage/currentMeetingPage.component";
 import UsersPage from "./pages/UsersPage/usersPage.component";
 import StartMeetingPage from "./pages/StartMeetingPage/startMeetingPage.component";
-import RecordedMeetingPage from "./pages/RecordedMeetingPage/recordedMeetingPage.component";
+import RecordedMeetingPage from "./pages/recordedMeetingPage/recordedMeetingPage.component";
+import AboutUsPage from './pages/AboutUsPage/aboutUsPage.component'
 import io from 'socket.io-client'
+
 
 export const socket = io.connect('http://localhost:5000/', {transports: ['websocket'], upgrade: false})
 
@@ -27,6 +29,7 @@ class App extends React.Component {
                     <Route path='/usersPage/:meetingId' render={(props) => <UsersPage {...props}/>}/>
                     <Route exact path='/startAnalysis' component={StartMeetingPage}/>
                     <Route exact path='/offlineAnalysis' component={RecordedMeetingPage}/>
+                    <Route exact path='/about' component={AboutUsPage}/>
                 </Switch>
 
             </div>
